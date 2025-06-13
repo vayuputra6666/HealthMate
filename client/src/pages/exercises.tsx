@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -85,7 +84,7 @@ export default function Exercises() {
             Add Exercise
           </Button>
         </div>
-        
+
         <EmptyState
           title="No exercises found"
           description="The exercise database is empty. Please check back later."
@@ -139,7 +138,7 @@ export default function Exercises() {
               <SelectItem value="all">All Categories</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                  {category ? category.charAt(0).toUpperCase() + category.slice(1) : 'Unknown'}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -152,7 +151,7 @@ export default function Exercises() {
               <SelectItem value="all">All Difficulties</SelectItem>
               {difficulties.map((difficulty) => (
                 <SelectItem key={difficulty} value={difficulty}>
-                  {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+                  {difficulty ? difficulty.charAt(0).toUpperCase() + difficulty.slice(1) : 'Unknown'}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -195,7 +194,7 @@ export default function Exercises() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-gray-600">{exercise.instructions}</p>
-                
+
                 {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
                   <div>
                     <h4 className="font-medium text-sm mb-2">Target Muscles</h4>

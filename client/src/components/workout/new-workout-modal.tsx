@@ -16,7 +16,7 @@ import ExerciseEntry from "./exercise-entry";
 
 interface NewWorkoutModalProps {
   open: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
 }
 
 type WorkoutFormData = {
@@ -34,7 +34,7 @@ type WorkoutFormData = {
   }[];
 };
 
-export default function NewWorkoutModal({ open, onClose }: NewWorkoutModalProps) {
+export default function NewWorkoutModal({ open, onOpenChange }: NewWorkoutModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -93,7 +93,7 @@ export default function NewWorkoutModal({ open, onClose }: NewWorkoutModalProps)
       gender: "male",
     });
     setExercises([{ exerciseId: 0, sets: [{ weight: "", reps: 0 }] }]);
-    onClose();
+    onOpenChange(false);
   };
 
   const addExercise = () => {
