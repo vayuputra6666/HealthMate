@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage, getStorage } from "./storage";
 import { 
   createWorkoutSchema, 
   insertExerciseSchema, 
@@ -44,10 +44,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Exercise routes
   app.get("/api/exercises", async (req, res) => {
     try {
-      const storageInstance = await getStorage();
-      const exercises = await storageInstance.getAllExercises();
       console.log("Fetching exercises...");
       res.setHeader('Content-Type', 'application/json');
+      const exercises = await storage.getAllExercises();
       console.log(`Found ${exercises.length} exercises`);
       res.json(exercises);
     } catch (error) {

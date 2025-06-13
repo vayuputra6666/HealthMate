@@ -742,4 +742,9 @@ async function initializeStorage(): Promise<IStorage> {
 // Initialize storage immediately
 initializeStorage().catch(console.error);
 
-export { storage };
+// Function to get initialized storage instance
+async function getStorage(): Promise<IStorage> {
+  return await initializeStorage();
+}
+
+export { storage, getStorage };
