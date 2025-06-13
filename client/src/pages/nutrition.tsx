@@ -43,6 +43,25 @@ interface NutritionGoals {
   dailyProtein: number;
   dailyCarbs: number;
   dailyFat: number;
+  maintenanceCalories?: number;
+  weightGoal?: "lose" | "maintain" | "gain";
+  activityLevel?: "sedentary" | "light" | "moderate" | "active" | "very_active";
+}
+
+interface WeightEntry {
+  id: number;
+  weight: string;
+  unit: "lbs" | "kg";
+  date: string;
+  notes?: string;
+}
+
+interface UserProfile {
+  id: number;
+  height?: string;
+  heightUnit: "inches" | "cm";
+  age?: number;
+  gender: "male" | "female";
 }
 
 export default function Nutrition() {
@@ -50,6 +69,20 @@ export default function Nutrition() {
   const [showMealModal, setShowMealModal] = useState(false);
   const [showRecipeModal, setShowRecipeModal] = useState(false);
   const [showGoalsModal, setShowGoalsModal] = useState(false);
+  const [showWeightModal, setShowWeightModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [newWeight, setNewWeight] = useState({
+    weight: "",
+    unit: "lbs" as const,
+    date: new Date().toISOString().split('T')[0],
+    notes: ""
+  });
+  const [profileData, setProfileData] = useState({
+    height: "",
+    heightUnit: "inches" as const,
+    age: "",
+    gender: "male" as const
+  });
   const [newMeal, setNewMeal] = useState({
     name: "",
     type: "breakfast" as const,
@@ -98,6 +131,53 @@ export default function Nutrition() {
       if (!response.ok) throw new Error('Failed to fetch nutrition goals');
       return response.json();
     },
+  });
+
+  const { data: weightEntries = [] } = useQuery<WeightEntry[]>({
+    queryKey: ['weight-entries'],
+    queryFn: async () => {
+      const response = await fetch('/api/weight');
+      if (!response.ok) throw new Error('Failed to fetch weight entries');
+      return response.json();
+    },
+  });
+
+  const { data: latestWeight } = useQuery<WeightEntry>({
+    queryKey: ['latest-weight'],
+    queryFn: async () => {
+      const response = await fetch('/api/weight/latest');
+      if (!response.ok) throw new Error('Failed to fetch latest weight');
+      return response.json();
+    },
+  });
+
+  const { data: userProfile } = useQuery<UserProfile>({
+    queryKey: ['user-profile'],
+    queryFn: async () => {
+      const response = await fetch('/api/profile');
+      if (!response.ok) throw new Error('Failed to fetch user profile');
+      return response.json();
+    },
+  });
+
+  const { data: bmiData } = useQuery<{ bmi: number }>({
+    queryKey: ['bmi'],
+    queryFn: async () => {
+      const response = await fetch('/api/bmi');
+      if (!response.ok) throw new Error('Failed to fetch BMI');
+      return response.json();
+    },
+    enabled: !!latestWeight && !!userProfile?.height,
+  });
+
+  const { data: calorieData } = useQuery<{ maintenanceCalories: number; recommendedCalories: number; weightGoal: string }>({
+    queryKey: ['maintenance-calories'],
+    queryFn: async () => {
+      const response = await fetch('/api/maintenance-calories');
+      if (!response.ok) throw new Error('Failed to fetch maintenance calories');
+      return response.json();
+    },
+    enabled: !!latestWeight && !!userProfile,
   });
 
   const addMeal = async () => {
@@ -165,6 +245,52 @@ export default function Nutrition() {
     }
   };
 
+  const addWeight = async () => {
+    try {
+      const response = await fetch('/api/weight', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...newWeight,
+          weight: parseFloat(newWeight.weight),
+          date: new Date(newWeight.date + 'T12:00:00'),
+        }),
+      });
+
+      if (response.ok) {
+        setShowWeightModal(false);
+        setNewWeight({
+          weight: "",
+          unit: "lbs",
+          date: new Date().toISOString().split('T')[0],
+          notes: ""
+        });
+      }
+    } catch (error) {
+      console.error('Failed to add weight:', error);
+    }
+  };
+
+  const updateProfile = async () => {
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...profileData,
+          height: parseFloat(profileData.height) || undefined,
+          age: parseInt(profileData.age) || undefined,
+        }),
+      });
+
+      if (response.ok) {
+        setShowProfileModal(false);
+      }
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+    }
+  };
+
   const dailyTotals = meals.reduce((totals, meal) => ({
     calories: totals.calories + (meal.calories || 0),
     protein: totals.protein + (meal.protein || 0),
@@ -187,8 +313,10 @@ export default function Nutrition() {
         </div>
 
         <Tabs defaultValue="tracking" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="tracking">Meal Tracking</TabsTrigger>
+            <TabsTrigger value="weight">Weight & BMI</TabsTrigger>
+            <TabsTrigger value="calories">Macro Calculator</TabsTrigger>
             <TabsTrigger value="recipes">Recipe Database</TabsTrigger>
             <TabsTrigger value="goals">Nutrition Goals</TabsTrigger>
             <TabsTrigger value="grocery">Grocery List</TabsTrigger>
@@ -296,6 +424,169 @@ export default function Nutrition() {
                 </Card>
               ))}
             </div>
+          </TabsContent>
+
+          <TabsContent value="weight" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Weight & BMI Tracking</h2>
+              <div className="space-x-2">
+                <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">Update Profile</Button>
+                  </DialogTrigger>
+                </Dialog>
+                <Dialog open={showWeightModal} onOpenChange={setShowWeightModal}>
+                  <DialogTrigger asChild>
+                    <Button>Add Weight</Button>
+                  </DialogTrigger>
+                </Dialog>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Current Weight</CardTitle>
+                  <CardDescription>Latest entry</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {latestWeight ? (
+                    <div>
+                      <div className="text-3xl font-bold">{latestWeight.weight} {latestWeight.unit}</div>
+                      <div className="text-sm text-gray-500">
+                        {new Date(latestWeight.date).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-gray-500">No weight entries yet</div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>BMI</CardTitle>
+                  <CardDescription>Body Mass Index</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {bmiData ? (
+                    <div>
+                      <div className="text-3xl font-bold">{bmiData.bmi}</div>
+                      <div className="text-sm text-gray-500">
+                        {bmiData.bmi < 18.5 ? 'Underweight' : 
+                         bmiData.bmi < 25 ? 'Normal' : 
+                         bmiData.bmi < 30 ? 'Overweight' : 'Obese'}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-gray-500">Add height and weight to calculate BMI</div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profile Info</CardTitle>
+                  <CardDescription>Height, age, gender</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {userProfile ? (
+                    <div className="space-y-1">
+                      {userProfile.height && (
+                        <div className="text-sm">Height: {userProfile.height} {userProfile.heightUnit}</div>
+                      )}
+                      {userProfile.age && (
+                        <div className="text-sm">Age: {userProfile.age}</div>
+                      )}
+                      <div className="text-sm">Gender: {userProfile.gender}</div>
+                    </div>
+                  ) : (
+                    <div className="text-gray-500">No profile data</div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Weight History</CardTitle>
+                <CardDescription>Track your progress over time</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {weightEntries.slice(0, 10).map((entry) => (
+                    <div key={entry.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <div>
+                        <div className="font-medium">{entry.weight} {entry.unit}</div>
+                        <div className="text-sm text-gray-500">
+                          {new Date(entry.date).toLocaleDateString()}
+                        </div>
+                      </div>
+                      {entry.notes && (
+                        <div className="text-sm text-gray-600">{entry.notes}</div>
+                      )}
+                    </div>
+                  ))}
+                  {weightEntries.length === 0 && (
+                    <div className="text-center py-4 text-gray-500">No weight entries yet</div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="calories" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Calorie & Macro Calculator</CardTitle>
+                <CardDescription>Personalized calorie recommendations based on your goals</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {calorieData ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div className="p-4 border rounded-lg">
+                        <div className="text-2xl font-bold">{calorieData.maintenanceCalories}</div>
+                        <div className="text-sm text-gray-500">Maintenance Calories</div>
+                        <div className="text-xs text-gray-400">Calories to maintain current weight</div>
+                      </div>
+                      <div className="p-4 border rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">{calorieData.recommendedCalories}</div>
+                        <div className="text-sm text-gray-500">Recommended Calories</div>
+                        <div className="text-xs text-gray-400">
+                          Based on your goal: {calorieData.weightGoal}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <h3 className="font-semibold">Macro Breakdown</h3>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span>Protein (25%):</span>
+                          <span>{Math.round(calorieData.recommendedCalories * 0.25 / 4)}g</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Carbs (45%):</span>
+                          <span>{Math.round(calorieData.recommendedCalories * 0.45 / 4)}g</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Fat (30%):</span>
+                          <span>{Math.round(calorieData.recommendedCalories * 0.30 / 9)}g</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 mb-4">Add your profile and weight to calculate personalized calorie recommendations</p>
+                    <div className="space-x-2">
+                      <Button onClick={() => setShowProfileModal(true)} variant="outline">Add Profile</Button>
+                      <Button onClick={() => setShowWeightModal(true)}>Add Weight</Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="recipes" className="space-y-6">
@@ -496,6 +787,145 @@ export default function Nutrition() {
                   Cancel
                 </Button>
                 <Button onClick={addMeal}>Add Meal</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Weight Modal */}
+        <Dialog open={showWeightModal} onOpenChange={setShowWeightModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Weight Entry</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="weight">Weight</Label>
+                  <Input
+                    id="weight"
+                    type="number"
+                    step="0.1"
+                    value={newWeight.weight}
+                    onChange={(e) => setNewWeight(prev => ({ ...prev, weight: e.target.value }))}
+                    placeholder="180.5"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="weight-unit">Unit</Label>
+                  <Select 
+                    value={newWeight.unit} 
+                    onValueChange={(value: "lbs" | "kg") => setNewWeight(prev => ({ ...prev, unit: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="lbs">lbs</SelectItem>
+                      <SelectItem value="kg">kg</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="weight-date">Date</Label>
+                <Input
+                  id="weight-date"
+                  type="date"
+                  value={newWeight.date}
+                  onChange={(e) => setNewWeight(prev => ({ ...prev, date: e.target.value }))}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="weight-notes">Notes (optional)</Label>
+                <Textarea
+                  id="weight-notes"
+                  value={newWeight.notes}
+                  onChange={(e) => setNewWeight(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="How are you feeling today?"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setShowWeightModal(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={addWeight}>Add Weight</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Profile Modal */}
+        <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Update Profile</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="height">Height</Label>
+                  <Input
+                    id="height"
+                    type="number"
+                    step="0.1"
+                    value={profileData.height}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, height: e.target.value }))}
+                    placeholder="70"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="height-unit">Unit</Label>
+                  <Select 
+                    value={profileData.heightUnit} 
+                    onValueChange={(value: "inches" | "cm") => setProfileData(prev => ({ ...prev, heightUnit: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="inches">inches</SelectItem>
+                      <SelectItem value="cm">cm</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="age">Age</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  value={profileData.age}
+                  onChange={(e) => setProfileData(prev => ({ ...prev, age: e.target.value }))}
+                  placeholder="25"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="gender">Gender</Label>
+                <Select 
+                  value={profileData.gender} 
+                  onValueChange={(value: "male" | "female") => setProfileData(prev => ({ ...prev, gender: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setShowProfileModal(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={updateProfile}>Update Profile</Button>
               </div>
             </div>
           </DialogContent>

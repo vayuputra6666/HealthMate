@@ -6,7 +6,9 @@ import {
   insertExerciseSchema, 
   insertMealSchema, 
   insertRecipeSchema, 
-  insertNutritionGoalSchema 
+  insertNutritionGoalSchema,
+  insertWeightEntrySchema,
+  insertUserProfileSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -220,6 +222,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(challenges);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch challenges" });
+    }
+  });
+
+  // Weight tracking routes
+  app.post("/api/weight", async (req, res) => {
+    try {
+      const weightData = insertWeightEntrySchema.parse(req.body);
+      const weightEntry = await storage.createWeightEntry(weightData);
+      res.status(201).json(weightEntry);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid weight data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create weight entry" });
+      }
+    }
+  });
+
+  app.get("/api/weight", async (req, res) => {
+    try {
+      const weightEntries = await storage.getWeightEntries();
+      res.json(weightEntries);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch weight entries" });
+    }
+  });
+
+  app.get("/api/weight/latest", async (req, res) => {
+    try {
+      const latestWeight = await storage.getLatestWeight();
+      res.json(latestWeight);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch latest weight" });
+    }
+  });
+
+  // User profile routes
+  app.get("/api/profile", async (req, res) => {
+    try {
+      const profile = await storage.getUserProfile();
+      res.json(profile);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user profile" });
+    }
+  });
+
+  app.post("/api/profile", async (req, res) => {
+    try {
+      const profileData = insertUserProfileSchema.parse(req.body);
+      const profile = await storage.updateUserProfile(profileData);
+      res.status(201).json(profile);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid profile data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update profile" });
+      }
+    }
+  });
+
+  // BMI and calorie calculation routes
+  app.get("/api/bmi", async (req, res) => {
+    try {
+      const profile = await storage.getUserProfile();
+      const latestWeight = await storage.getLatestWeight();
+      
+      if (!profile || !latestWeight || !profile.height) {
+        return res.status(400).json({ message: "Profile and weight data required for BMI calculation" });
+      }
+
+      const bmi = storage.calculateBMI(
+        parseFloat(latestWeight.weight), 
+        parseFloat(profile.height), 
+        latestWeight.unit, 
+        profile.heightUnit
+      );
+
+      res.json({ bmi: parseFloat(bmi.toFixed(1)) });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to calculate BMI" });
+    }
+  });
+
+  app.get("/api/maintenance-calories", async (req, res) => {
+    try {
+      const profile = await storage.getUserProfile();
+      const latestWeight = await storage.getLatestWeight();
+      
+      if (!profile || !latestWeight) {
+        return res.status(400).json({ message: "Profile and weight data required for calorie calculation" });
+      }
+
+      const maintenanceCalories = storage.calculateMaintenanceCalories(profile, parseFloat(latestWeight.weight));
+      
+      // Calculate deficit/surplus based on goal
+      const goals = await storage.getNutritionGoals();
+      let recommendedCalories = maintenanceCalories;
+      
+      if (goals?.weightGoal === 'lose') {
+        recommendedCalories = maintenanceCalories - 500; // 1lb per week deficit
+      } else if (goals?.weightGoal === 'gain') {
+        recommendedCalories = maintenanceCalories + 500; // 1lb per week surplus
+      }
+
+      res.json({ 
+        maintenanceCalories,
+        recommendedCalories,
+        weightGoal: goals?.weightGoal || 'maintain'
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to calculate maintenance calories" });
     }
   });
 
