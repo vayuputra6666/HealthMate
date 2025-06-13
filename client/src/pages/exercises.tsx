@@ -13,10 +13,10 @@ interface Exercise {
   id: number;
   name: string;
   category: string;
-  instructions: string;
+  instructions: string | null;
   difficulty: string;
   equipment: string[];
-  muscleGroups: string[];
+  muscleGroups: string[] | null;
 }
 
 export default function Exercises() {
@@ -139,7 +139,7 @@ export default function Exercises() {
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
               {categories.map((category) => (
-                <SelectItem key={category} value={category} className="capitalize">
+                <SelectItem key={`category-${category}`} value={category} className="capitalize">
                   {category}
                 </SelectItem>
               ))}
@@ -152,7 +152,7 @@ export default function Exercises() {
             <SelectContent>
               <SelectItem value="all">All Difficulties</SelectItem>
               {difficulties.map((difficulty) => (
-                <SelectItem key={difficulty} value={difficulty}>
+                <SelectItem key={`difficulty-${difficulty}`} value={difficulty}>
                   {difficulty ? difficulty.charAt(0).toUpperCase() + difficulty.slice(1) : 'Unknown'}
                 </SelectItem>
               ))}
@@ -190,19 +190,19 @@ export default function Exercises() {
                     <CardDescription className="capitalize">{exercise.category}</CardDescription>
                   </div>
                   <Badge variant={exercise.difficulty === 'advanced' ? 'destructive' : exercise.difficulty === 'intermediate' ? 'default' : 'secondary'}>
-                    {exercise.difficulty}
+                    {exercise.difficulty || 'beginner'}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm text-gray-600">{exercise.instructions}</p>
+                <p className="text-sm text-gray-600">{exercise.instructions || 'No instructions available'}</p>
 
                 {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
                   <div>
                     <h4 className="font-medium text-sm mb-2">Target Muscles</h4>
                     <div className="flex flex-wrap gap-1">
                       {exercise.muscleGroups.map((muscle, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
+                        <Badge key={`muscle-${exercise.id}-${index}`} variant="outline" className="text-xs">
                           {muscle}
                         </Badge>
                       ))}
@@ -215,7 +215,7 @@ export default function Exercises() {
                     <h4 className="font-medium text-sm mb-2">Equipment</h4>
                     <div className="flex flex-wrap gap-1">
                       {exercise.equipment.map((equip, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
+                        <Badge key={`equipment-${exercise.id}-${index}`} variant="secondary" className="text-xs">
                           {equip}
                         </Badge>
                       ))}

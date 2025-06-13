@@ -131,61 +131,81 @@ export class MemStorage implements IStorage {
         name: "Bench Press", 
         category: "chest", 
         instructions: "Lie on bench, lower bar to chest, press up",
-        muscleGroups: ["chest", "triceps", "shoulders"]
+        muscleGroups: ["chest", "triceps", "shoulders"],
+        difficulty: "intermediate",
+        equipment: ["barbell", "bench"]
       },
       { 
         name: "Squats", 
         category: "legs", 
         instructions: "Stand with feet shoulder-width apart, squat down, stand up",
-        muscleGroups: ["quadriceps", "glutes", "hamstrings", "calves"]
+        muscleGroups: ["quadriceps", "glutes", "hamstrings", "calves"],
+        difficulty: "beginner",
+        equipment: ["barbell", "squat rack"]
       },
       { 
         name: "Deadlift", 
         category: "back", 
         instructions: "Stand over bar, grip with both hands, lift with legs and back",
-        muscleGroups: ["hamstrings", "glutes", "erector_spinae", "traps", "lats"]
+        muscleGroups: ["hamstrings", "glutes", "erector_spinae", "traps", "lats"],
+        difficulty: "advanced",
+        equipment: ["barbell", "plates"]
       },
       { 
         name: "Pull-ups", 
         category: "back", 
         instructions: "Hang from bar, pull body up until chin over bar",
-        muscleGroups: ["lats", "rhomboids", "biceps", "traps"]
+        muscleGroups: ["lats", "rhomboids", "biceps", "traps"],
+        difficulty: "intermediate",
+        equipment: ["pull-up bar"]
       },
       { 
         name: "Overhead Press", 
         category: "shoulders", 
         instructions: "Press weight overhead from shoulder height",
-        muscleGroups: ["shoulders", "triceps", "traps"]
+        muscleGroups: ["shoulders", "triceps", "traps"],
+        difficulty: "intermediate",
+        equipment: ["barbell", "dumbbells"]
       },
       { 
         name: "Rows", 
         category: "back", 
         instructions: "Pull weight towards torso while bent over",
-        muscleGroups: ["lats", "rhomboids", "traps", "biceps"]
+        muscleGroups: ["lats", "rhomboids", "traps", "biceps"],
+        difficulty: "beginner",
+        equipment: ["barbell", "dumbbells"]
       },
       { 
         name: "Dips", 
         category: "chest", 
         instructions: "Lower body between parallel bars, push back up",
-        muscleGroups: ["chest", "triceps", "shoulders"]
+        muscleGroups: ["chest", "triceps", "shoulders"],
+        difficulty: "intermediate",
+        equipment: ["dip bars", "parallel bars"]
       },
       { 
         name: "Leg Press", 
         category: "legs", 
         instructions: "Push weight away with legs while seated",
-        muscleGroups: ["quadriceps", "glutes", "hamstrings"]
+        muscleGroups: ["quadriceps", "glutes", "hamstrings"],
+        difficulty: "beginner",
+        equipment: ["leg press machine"]
       },
       { 
         name: "Bicep Curls", 
         category: "arms", 
         instructions: "Curl weight up towards shoulders",
-        muscleGroups: ["biceps"]
+        muscleGroups: ["biceps"],
+        difficulty: "beginner",
+        equipment: ["dumbbells", "barbell"]
       },
       { 
         name: "Tricep Extensions", 
         category: "arms", 
         instructions: "Extend weight overhead or behind head",
-        muscleGroups: ["triceps"]
+        muscleGroups: ["triceps"],
+        difficulty: "beginner",
+        equipment: ["dumbbells", "cable machine"]
       },
     ];
 
@@ -353,7 +373,9 @@ export class MemStorage implements IStorage {
       ...insertExercise, 
       id,
       instructions: insertExercise.instructions ?? null,
-      muscleGroups: insertExercise.muscleGroups ?? null
+      muscleGroups: insertExercise.muscleGroups ?? null,
+      difficulty: insertExercise.difficulty ?? "beginner",
+      equipment: insertExercise.equipment ?? []
     };
     this.exercises.set(id, exercise);
     return exercise;
