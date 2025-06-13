@@ -1,5 +1,6 @@
-import { Link, useLocation } from "wouter";
-import { BarChart3, Dumbbell, List, TrendingUp, History, Apple, X } from "lucide-react";
+
+import { Link, useLocation } from "react-router-dom";
+import { BarChart3, Dumbbell, List, TrendingUp, History, Apple, X, Lightbulb } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const navigation = [
@@ -9,6 +10,7 @@ const navigation = [
   { name: "Progress", href: "/progress", icon: TrendingUp },
   { name: "Nutrition", href: "/nutrition", icon: Apple },
   { name: "History", href: "/history", icon: History },
+  { name: "Motivation", href: "/motivation", icon: Lightbulb },
 ];
 
 interface MobileNavProps {
@@ -17,35 +19,37 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ open, onClose }: MobileNavProps) {
-  const [location] = useLocation();
+  const location = useLocation();
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="left" className="w-80">
+      <SheetContent side="left" className="w-64">
         <SheetHeader>
-          <SheetTitle>GymTracker</SheetTitle>
+          <SheetTitle className="text-left">HealthMate</SheetTitle>
         </SheetHeader>
-        <nav className="mt-6">
-          <div className="space-y-2">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const isActive = location === item.href;
-
-              return (
-                <div key={item.name} className={`flex items-center px-4 py-3 text-sm rounded-lg transition-colors cursor-pointer ${
-                  isActive 
-                    ? 'bg-gray-900 text-white' 
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`} onClick={() => {
-                  window.location.href = item.href;
-                  onClose();
-                }}>
-                  <Icon className="mr-3 h-5 w-5" />
-                  {item.name}
-                </div>
-              );
-            })}
-          </div>
+        <nav className="mt-6 space-y-1">
+          {navigation.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                onClick={onClose}
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActive
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+              >
+                <item.icon
+                  className={`mr-3 h-5 w-5 ${
+                    isActive ? "text-blue-500" : "text-gray-400 group-hover:text-gray-500"
+                  }`}
+                />
+                {item.name}
+              </Link>
+            );
+          })}
         </nav>
       </SheetContent>
     </Sheet>
