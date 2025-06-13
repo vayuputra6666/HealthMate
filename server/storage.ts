@@ -58,12 +58,26 @@ export interface IStorage {
    createRecipe(recipe: InsertRecipe): Promise<Recipe>;
    getNutritionGoals(): Promise<NutritionGoal | undefined>;
    updateNutritionGoals(goals: InsertNutritionGoal): Promise<NutritionGoal>;
- 
-   // Motivational content methods
-   getRandomQuote(): Promise<MotivationalQuote | undefined>;
-   getQuotesByCategory(category: string): Promise<MotivationalQuote[]>;
-   getTodaysChallenge(): Promise<DailyChallenge | undefined>;
-   getAllChallenges(): Promise<DailyChallenge[]>;
+
+  // Weight tracking methods
+  createWeightEntry(weightEntry: InsertWeightEntry): Promise<WeightEntry>;
+  getWeightEntries(): Promise<WeightEntry[]>;
+  getLatestWeight(): Promise<WeightEntry | undefined>;
+
+  // User profile methods
+  createUserProfile(profile: InsertUserProfile): Promise<UserProfile>;
+  getUserProfile(): Promise<UserProfile | undefined>;
+  updateUserProfile(profile: InsertUserProfile): Promise<UserProfile>;
+
+  // Calculation methods
+  calculateBMI(weight: number, height: number, weightUnit: 'lbs' | 'kg', heightUnit: 'inches' | 'cm'): number;
+  calculateMaintenanceCalories(profile: UserProfile, weight: number): number;
+
+  // Motivational content methods
+  getRandomQuote(): Promise<MotivationalQuote | undefined>;
+  getQuotesByCategory(category: string): Promise<MotivationalQuote[]>;
+  getTodaysChallenge(): Promise<DailyChallenge | undefined>;
+  getAllChallenges(): Promise<DailyChallenge[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -571,7 +585,7 @@ export class MemStorage implements IStorage {
     // Convert to metric for calculation
     let weightKg = weightUnit === 'lbs' ? weight * 0.453592 : weight;
     let heightM = heightUnit === 'inches' ? height * 0.0254 : height / 100;
-    
+
     return weightKg / (heightM * heightM);
   }
 

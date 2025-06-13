@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -65,6 +65,7 @@ interface UserProfile {
 }
 
 export default function Nutrition() {
+  const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [showMealModal, setShowMealModal] = useState(false);
   const [showRecipeModal, setShowRecipeModal] = useState(false);
@@ -196,6 +197,7 @@ export default function Nutrition() {
       });
 
       if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ['meals'] });
         setShowMealModal(false);
         setNewMeal({
           name: "",
@@ -224,6 +226,7 @@ export default function Nutrition() {
       });
 
       if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ['recipes'] });
         setShowRecipeModal(false);
         setNewRecipe({
           name: "",
@@ -258,6 +261,10 @@ export default function Nutrition() {
       });
 
       if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ['weight-entries'] });
+        queryClient.invalidateQueries({ queryKey: ['latest-weight'] });
+        queryClient.invalidateQueries({ queryKey: ['bmi'] });
+        queryClient.invalidateQueries({ queryKey: ['maintenance-calories'] });
         setShowWeightModal(false);
         setNewWeight({
           weight: "",
@@ -284,6 +291,9 @@ export default function Nutrition() {
       });
 
       if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+        queryClient.invalidateQueries({ queryKey: ['bmi'] });
+        queryClient.invalidateQueries({ queryKey: ['maintenance-calories'] });
         setShowProfileModal(false);
       }
     } catch (error) {

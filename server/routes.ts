@@ -301,6 +301,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ bmi: parseFloat(bmi.toFixed(1)) });
     } catch (error) {
+      console.error('BMI calculation error:', error);
       res.status(500).json({ message: "Failed to calculate BMI" });
     }
   });
