@@ -1,16 +1,21 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ApiErrorDisplay } from "@/components/ui/error-boundary";
+import { LoadingState } from "@/components/ui/loading";
 import StatsGrid from "@/components/dashboard/stats-grid";
 import QuickActions from "@/components/dashboard/quick-actions";
 import RecentWorkouts from "@/components/dashboard/recent-workouts";
 import TodaysMuscleActivation from "@/components/body-visualization/todays-muscle-activation";
 import NewWorkoutModal from "@/components/workout/new-workout-modal";
+import { api } from "@/lib/api";
+
 export default function Dashboard() {
   const [showNewWorkoutModal, setShowNewWorkoutModal] = useState(false);
-    const { data: stats, isLoading: statsLoading, error: statsError } = useQuery({
+  
+  const { data: stats, isLoading: statsLoading, error: statsError } = useQuery({
     queryKey: ["/api/stats"],
     queryFn: async () => {
       const res = await fetch("/api/stats");
