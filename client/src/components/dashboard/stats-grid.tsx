@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { Calendar, Weight, Clock } from "lucide-react";
 
 interface Stats {
@@ -7,32 +6,12 @@ interface Stats {
   avgDuration: number;
 }
 
-export default function StatsGrid() {
-  const { data: stats, isLoading, error } = useQuery<Stats>({
-    queryKey: ["/api/stats"],
-    queryFn: async () => {
-      const res = await fetch("/api/stats");
-      if (!res.ok) {
-        throw new Error(`Failed to fetch stats: ${res.status}`);
-      }
-      const data = await res.json();
-      console.log("Stats data received:", data);
-      return data;
-    },
-  });
+interface StatsGridProps {
+  stats?: Stats;
+}
 
-  if (error) {
-    console.error("Stats loading error:", error);
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="col-span-full text-center py-4 text-red-600">
-          Failed to load stats: {error.message}
-        </div>
-      </div>
-    );
-  }
-
-  if (isLoading) {
+export default function StatsGrid({ stats }: StatsGridProps) {
+  if (!stats) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {[1, 2, 3].map((i) => (

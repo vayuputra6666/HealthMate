@@ -1,60 +1,15 @@
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Dumbbell, Plus } from "lucide-react";
 import { LoadingSpinner, EmptyState } from "@/components/ui/loading";
 
-export default function RecentWorkouts() {
-  const { data: workouts, isLoading, error } = useQuery({
-    queryKey: ["/api/workouts"],
-    queryFn: async () => {
-      const res = await fetch("/api/workouts");
-      if (!res.ok) {
-        throw new Error(`Failed to fetch workouts: ${res.status}`);
-      }
-      const data = await res.json();
-      console.log("Workouts data received:", data);
-      return data;
-    },
-  });
+interface RecentWorkoutsProps {
+  workouts?: any[];
+}
 
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Dumbbell className="w-5 h-5" />
-            Recent Workouts
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-4 text-red-600">
-            Failed to load workouts: {error.message}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Dumbbell className="w-5 h-5" />
-            Recent Workouts
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <LoadingSpinner size="md" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+export default function RecentWorkouts({ workouts }: RecentWorkoutsProps) {
 
   const recentWorkouts = workouts?.slice(0, 3) || [];
 
