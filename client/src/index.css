@@ -4,75 +4,81 @@
 
 @keyframes dumbbell-bounce {
   0% {
-    transform: translateY(-80px) rotate(0deg);
-    animation-timing-function: ease-in;
+    transform: translateY(-120px) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
   }
   
-  15% {
-    transform: translateY(0px) rotate(45deg);
-    animation-timing-function: ease-out;
+  18% {
+    transform: translateY(0px) rotate(60deg);
+    animation-timing-function: cubic-bezier(0.17, 0.67, 0.83, 0.67);
   }
   
-  20% {
-    transform: translateY(-25px) rotate(90deg);
-    animation-timing-function: ease-in;
-  }
-  
-  30% {
-    transform: translateY(0px) rotate(135deg);
-    animation-timing-function: ease-out;
+  25% {
+    transform: translateY(-45px) rotate(120deg);
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
   }
   
   35% {
-    transform: translateY(-15px) rotate(180deg);
-    animation-timing-function: ease-in;
+    transform: translateY(0px) rotate(180deg);
+    animation-timing-function: cubic-bezier(0.17, 0.67, 0.83, 0.67);
   }
   
   42% {
-    transform: translateY(0px) rotate(225deg);
-    animation-timing-function: ease-out;
+    transform: translateY(-28px) rotate(240deg);
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
   }
   
-  46% {
-    transform: translateY(-8px) rotate(270deg);
-    animation-timing-function: ease-in;
+  50% {
+    transform: translateY(0px) rotate(300deg);
+    animation-timing-function: cubic-bezier(0.17, 0.67, 0.83, 0.67);
   }
   
-  52% {
-    transform: translateY(0px) rotate(315deg);
-    animation-timing-function: ease-out;
+  56% {
+    transform: translateY(-18px) rotate(360deg);
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
   }
   
-  55% {
-    transform: translateY(-4px) rotate(360deg);
-    animation-timing-function: ease-in;
-  }
-  
-  60% {
+  63% {
     transform: translateY(0px) rotate(360deg);
-    animation-timing-function: ease-out;
-  }
-  
-  62% {
-    transform: translateY(-2px) rotate(360deg);
-    animation-timing-function: ease-in;
-  }
-  
-  66% {
-    transform: translateY(0px) rotate(360deg);
-    animation-timing-function: ease-out;
+    animation-timing-function: cubic-bezier(0.17, 0.67, 0.83, 0.67);
   }
   
   68% {
-    transform: translateY(-1px) rotate(360deg);
-    animation-timing-function: ease-in;
+    transform: translateY(-12px) rotate(360deg);
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
   }
   
-  72% {
+  74% {
     transform: translateY(0px) rotate(360deg);
+    animation-timing-function: cubic-bezier(0.17, 0.67, 0.83, 0.67);
   }
   
-  72% {
+  78% {
+    transform: translateY(-6px) rotate(360deg);
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  }
+  
+  83% {
+    transform: translateY(0px) rotate(360deg);
+    animation-timing-function: cubic-bezier(0.17, 0.67, 0.83, 0.67);
+  }
+  
+  86% {
+    transform: translateY(-3px) rotate(360deg);
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  }
+  
+  90% {
+    transform: translateY(0px) rotate(360deg);
+    animation-timing-function: cubic-bezier(0.17, 0.67, 0.83, 0.67);
+  }
+  
+  93% {
+    transform: translateY(-1px) rotate(360deg);
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  }
+  
+  96% {
     transform: translateY(0px) rotate(360deg);
   }
   
@@ -82,7 +88,7 @@
 }
 
 .animate-dumbbell-bounce {
-  animation: dumbbell-bounce 3s ease-in-out infinite;
+  animation: dumbbell-bounce 4.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
   transform-origin: center center;
 }
 
