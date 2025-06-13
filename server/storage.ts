@@ -709,24 +709,37 @@ import { MongoStorage } from "./mongo-storage";
 const useMongoDb = process.env.USE_MONGODB === 'true';
 
 let storage: IStorage;
+let isInitialized = false;
 
-if (useMongoDb) {
-  try {
-    const mongoStorage = new MongoStorage();
-    // Initialize MongoDB connection with proper error handling
-    mongoStorage.connect().then(() => {
-      console.log("MongoDB storage initialized successfully");
-    }).catch((error) => {
-      console.error("MongoDB connection failed, application will use memory storage:", error);
-    });
-    storage = mongoStorage;
-  } catch (error) {
-    console.error("Failed to create MongoDB storage, falling back to memory storage:", error);
-    storage = new MemStorage();
+async function initializeStorage(): Promise<IStorage> {
+  if (isInitialized) {
+    return storage;
   }
-} else {
-  console.log("Using memory storage (MongoDB disabled)");
-  storage = new MemStorage();
+
+  if (useMongoDb) {
+    try {
+      console.log("Initializing MongoDB storage...");
+      const mongoStorage = new MongoStorage();
+      await mongoStorage.connect();
+      console.log("MongoDB storage initialized successfully");
+      storage = mongoStorage;
+      isInitialized = true;
+      return storage;
+    } catch (error) {
+      console.error("MongoDB connection failed, falling back to memory storage:", error);
+      storage = new MemStorage();
+      isInitialized = true;
+      return storage;
+    }
+  } else {
+    console.log("Using memory storage (MongoDB disabled)");
+    storage = new MemStorage();
+    isInitialized = true;
+    return storage;
+  }
 }
+
+// Initialize storage immediately
+initializeStorage().catch(console.error);
 
 export { storage };

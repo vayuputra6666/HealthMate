@@ -275,11 +275,13 @@ export class MongoStorage implements IStorage {
       }
       const exercises = await this.exercises.find({}).toArray();
       console.log(`Retrieved ${exercises.length} exercises from MongoDB`);
-      return exercises.map((exercise, index) => ({ 
-        ...exercise, 
-        id: exercise.id || index + 1,
-        _id: undefined // Remove MongoDB _id field
-      }));
+      return exercises.map((exercise, index) => {
+        const { _id, ...exerciseData } = exercise;
+        return { 
+          ...exerciseData, 
+          id: index + 1 // Use sequential IDs for consistency
+        };
+      });
     } catch (error) {
       console.error("Failed to get exercises from MongoDB:", error);
       throw error;
