@@ -1,4 +1,3 @@
-
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? window.location.origin 
   : 'http://localhost:5000';
@@ -12,7 +11,7 @@ export class ApiError extends Error {
 
 export async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   try {
     const response = await fetch(url, {
       headers: {
@@ -40,7 +39,7 @@ export async function apiRequest<T>(endpoint: string, options: RequestInit = {})
     if (error instanceof ApiError) {
       throw error;
     }
-    
+
     // Network or other errors
     console.error('API request failed:', error);
     throw new ApiError('Network error or server unavailable', 0);

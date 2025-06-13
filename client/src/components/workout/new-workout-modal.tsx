@@ -251,3 +251,140 @@ export default function NewWorkoutModal({ open, onClose }: NewWorkoutModalProps)
     </Dialog>
   );
 }
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+
+interface NewWorkoutModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export default function NewWorkoutModal({ open, onClose }: NewWorkoutModalProps) {
+  const [name, setName] = useState("");
+  const [notes, setNotes] = useState("");
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const createWorkoutMutation = useMutation({
+    mutationFn: async (workoutData: any) => {
+      const res = await fetch("/api/workouts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(workoutData),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to create workout");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workouts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/workouts/today"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      toast({
+        title: "Success",
+        description: "Workout created successfully!",
+      });
+      handleClose();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create workout",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!name.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a workout name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const workoutData = {
+      name: name.trim(),
+      date: new Date().toISOString(),
+      duration: 0,
+      exercises: [],
+      notes: notes.trim() || undefined,
+    };
+
+    createWorkoutMutation.mutate(workoutData);
+  };
+
+  const handleClose = () => {
+    setName("");
+    setNotes("");
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create New Workout</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="workout-name">Workout Name</Label>
+            <Input
+              id="workout-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., Upper Body Strength"
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="workout-notes">Notes (Optional)</Label>
+            <Textarea
+              id="workout-notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Any additional notes about your workout..."
+              rows={3}
+            />
+          </div>
+          
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={createWorkoutMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={createWorkoutMutation.isPending}
+            >
+              {createWorkoutMutation.isPending ? "Creating..." : "Create Workout"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

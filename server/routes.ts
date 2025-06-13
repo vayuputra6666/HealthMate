@@ -83,20 +83,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get today's workouts
-  app.get("/api/workouts/today", (req, res) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+  app.get("/api/workouts/today", async (req, res) => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const workouts = storage.getWorkouts();
-    const todaysWorkouts = workouts.filter(workout => {
-      const workoutDate = new Date(workout.date);
-      workoutDate.setHours(0, 0, 0, 0);
-      return workoutDate.getTime() === today.getTime();
-    });
+      const workouts = await storage.getAllWorkouts();
+      const todaysWorkouts = workouts.filter(workout => {
+        const workoutDate = new Date(workout.date);
+        workoutDate.setHours(0, 0, 0, 0);
+        return workoutDate.getTime() === today.getTime();
+      });
 
-    res.json(todaysWorkouts);
+      res.json(todaysWorkouts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch today's workouts" });
+    }
   });
 
   app.get("/api/workouts/:id", async (req, res) => {

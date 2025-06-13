@@ -24,6 +24,7 @@ export default function Dashboard() {
     },
     retry: 2,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 
   const { data: workouts, isLoading: workoutsLoading, error: workoutsError } = useQuery({
@@ -37,6 +38,7 @@ export default function Dashboard() {
     },
     retry: 2,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 
   if (statsLoading || workoutsLoading) {
