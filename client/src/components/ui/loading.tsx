@@ -14,9 +14,9 @@ export function LoadingSpinner({ className, size = "md" }: LoadingSpinnerProps) 
   };
 
   return (
-    <div className={cn("flex items-center justify-center", className)}>
-      <div className={cn("animate-spin-reverse", sizeClasses[size])}>
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-lg">
+    <div className={cn("flex items-center justify-center relative h-32", className)}>
+      <div className={cn("animate-dumbbell-bounce relative", sizeClasses[size])}>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-xl">
           {/* Dumbbell handle with 3D effect */}
           <rect
             x="9"
@@ -92,6 +92,8 @@ export function LoadingSpinner({ className, size = "md" }: LoadingSpinnerProps) 
           />
         </svg>
       </div>
+      {/* Floor line */}
+      <div className="absolute bottom-0 w-full h-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent opacity-50"></div>
     </div>
   );
 }

@@ -2,17 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
-@keyframes spin-reverse {
-  from {
-    transform: rotate(0deg);
+@keyframes dumbbell-bounce {
+  0% {
+    transform: translateY(-80px) rotate(0deg);
+    animation-timing-function: ease-in;
   }
-  to {
-    transform: rotate(-360deg);
+  
+  15% {
+    transform: translateY(0px) rotate(45deg);
+    animation-timing-function: ease-out;
+  }
+  
+  20% {
+    transform: translateY(-25px) rotate(90deg);
+    animation-timing-function: ease-in;
+  }
+  
+  30% {
+    transform: translateY(0px) rotate(135deg);
+    animation-timing-function: ease-out;
+  }
+  
+  35% {
+    transform: translateY(-15px) rotate(180deg);
+    animation-timing-function: ease-in;
+  }
+  
+  42% {
+    transform: translateY(0px) rotate(225deg);
+    animation-timing-function: ease-out;
+  }
+  
+  46% {
+    transform: translateY(-8px) rotate(270deg);
+    animation-timing-function: ease-in;
+  }
+  
+  52% {
+    transform: translateY(0px) rotate(315deg);
+    animation-timing-function: ease-out;
+  }
+  
+  55% {
+    transform: translateY(-4px) rotate(360deg);
+    animation-timing-function: ease-in;
+  }
+  
+  60% {
+    transform: translateY(0px) rotate(360deg);
+    animation-timing-function: ease-out;
+  }
+  
+  62% {
+    transform: translateY(-2px) rotate(360deg);
+    animation-timing-function: ease-in;
+  }
+  
+  66% {
+    transform: translateY(0px) rotate(360deg);
+    animation-timing-function: ease-out;
+  }
+  
+  68% {
+    transform: translateY(-1px) rotate(360deg);
+    animation-timing-function: ease-in;
+  }
+  
+  72% {
+    transform: translateY(0px) rotate(360deg);
+  }
+  
+  72% {
+    transform: translateY(0px) rotate(360deg);
+  }
+  
+  100% {
+    transform: translateY(0px) rotate(360deg);
   }
 }
 
-.animate-spin-reverse {
-  animation: spin-reverse 1s linear infinite;
+.animate-dumbbell-bounce {
+  animation: dumbbell-bounce 3s ease-in-out infinite;
+  transform-origin: center center;
 }
 
 @keyframes bounce-flip {
