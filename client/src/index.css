@@ -4,19 +4,19 @@
 
 @keyframes bounce-flip {
   0%, 100% {
-    transform: translateY(0) rotateY(0deg);
+    transform: translateY(0) rotateX(0deg);
     animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
   25% {
-    transform: translateY(-25%) rotateY(90deg);
+    transform: translateY(-25%) rotateX(90deg);
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
   }
   50% {
-    transform: translateY(-50%) rotateY(180deg);
+    transform: translateY(-50%) rotateX(180deg);
     animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
   75% {
-    transform: translateY(-25%) rotateY(270deg);
+    transform: translateY(-25%) rotateX(270deg);
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
   }
 }
