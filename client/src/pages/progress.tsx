@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
+import { Progress as ProgressBar } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
@@ -262,7 +262,7 @@ export default function Progress() {
                         <span>Previous: {exercise.previousWeight} lbs</span>
                         <span>Current: {exercise.currentWeight} lbs</span>
                       </div>
-                      <Progress value={Math.min(Math.abs(exercise.improvement) * 2, 100)} className="h-2" />
+                      <ProgressBar value={Math.min(Math.abs(exercise.improvement) * 2, 100)} className="h-2" />
                     </div>
                   ))}
                 </div>
