@@ -16,20 +16,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Global error handler middleware
   app.use((err: any, req: any, res: any, next: any) => {
     console.error('API Error:', err);
-    
+
     // Ensure we always send JSON responses
     res.setHeader('Content-Type', 'application/json');
-    
+
     if (err instanceof z.ZodError) {
       return res.status(400).json({ 
         message: "Validation error", 
         errors: err.errors 
       });
     }
-    
+
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
-    
+
     res.status(status).json({ 
       message,
       ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
@@ -80,6 +80,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch workouts" });
     }
+  });
+
+  // Get today's workouts
+  app.get("/api/workouts/today", (req, res) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const workouts = storage.getWorkouts();
+    const todaysWorkouts = workouts.filter(workout => {
+      const workoutDate = new Date(workout.date);
+      workoutDate.setHours(0, 0, 0, 0);
+      return workoutDate.getTime() === today.getTime();
+    });
+
+    res.json(todaysWorkouts);
   });
 
   app.get("/api/workouts/:id", async (req, res) => {
@@ -221,14 +238,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const category = req.query.category as string;
       let quote;
-      
+
       if (category) {
         const quotes = await storage.getQuotesByCategory(category);
         quote = quotes[0];
       } else {
         quote = await storage.getRandomQuote();
       }
-      
+
       res.json(quote);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch motivational quote" });
@@ -315,7 +332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const profile = await storage.getUserProfile();
       const latestWeight = await storage.getLatestWeight();
-      
+
       if (!profile || !latestWeight || !profile.height) {
         return res.status(400).json({ message: "Profile and weight data required for BMI calculation" });
       }
@@ -338,17 +355,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const profile = await storage.getUserProfile();
       const latestWeight = await storage.getLatestWeight();
-      
+
       if (!profile || !latestWeight) {
         return res.status(400).json({ message: "Profile and weight data required for calorie calculation" });
       }
 
       const maintenanceCalories = storage.calculateMaintenanceCalories(profile, parseFloat(latestWeight.weight));
-      
+
       // Calculate deficit/surplus based on goal
       const goals = await storage.getNutritionGoals();
       let recommendedCalories = maintenanceCalories;
-      
+
       if (goals?.weightGoal === 'lose') {
         recommendedCalories = maintenanceCalories - 500; // 1lb per week deficit
       } else if (goals?.weightGoal === 'gain') {
