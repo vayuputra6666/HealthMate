@@ -27,7 +27,7 @@ interface WorkoutProgress {
   improvement: number;
 }
 
-export default function Progress() {
+export default function ProgressPage() {
   const { data: progressData, isLoading } = useQuery<ProgressData[]>({
     queryKey: ["/api/progress"],
     queryFn: async () => {
