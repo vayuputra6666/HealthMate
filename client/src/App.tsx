@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -15,7 +14,8 @@ import Nutrition from "@/pages/nutrition";
 import Motivation from "@/pages/motivation";
 import Sidebar from "@/components/layout/sidebar";
 import MobileNav from "@/components/layout/mobile-nav";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { LoadingState } from "@/components/ui/loading";
 
 function Router() {
   return (
@@ -34,6 +34,22 @@ function Router() {
 
 function App() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate app initialization
+    const initApp = async () => {
+      await new Promise(resolve => setTimeout(resolve, 3000)); // 3 second loading
+      setIsLoading(false);
+    };
+
+    initApp();
+  }, []);
+
+  if (isLoading) {
+    return <LoadingState />;
+  }
+
 
   return (
     <ErrorBoundary>
