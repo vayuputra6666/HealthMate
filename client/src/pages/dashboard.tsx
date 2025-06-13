@@ -4,12 +4,9 @@ import { Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ApiErrorDisplay } from "@/components/ui/error-boundary";
 import StatsGrid from "@/components/dashboard/stats-grid";
-import RecentWorkouts from "@/components/dashboard/recent-workouts";
 import QuickActions from "@/components/dashboard/quick-actions";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
-import { LoadingState } from "@/components/ui/loading";
-import { TodaysMuscleActivation } from "@/components/body-visualization/todays-muscle-activation";
+import RecentWorkouts from "@/components/dashboard/recent-workouts";
+import TodaysMuscleActivation from "@/components/body-visualization/todays-muscle-activation";
 import NewWorkoutModal from "@/components/workout/new-workout-modal";
 export default function Dashboard() {
   const [showNewWorkoutModal, setShowNewWorkoutModal] = useState(false);
