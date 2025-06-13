@@ -16,29 +16,35 @@ export function LoadingSpinner({ className, size = "md" }: LoadingSpinnerProps) 
 
   return (
     <div className={cn("flex items-center justify-center", className)}>
-      <div className={cn("animate-spin", sizeClasses[size])}>
+      <div className={cn("animate-bounce", sizeClasses[size])}>
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M4 12C4 12.5523 3.55228 13 3 13C2.44772 13 2 12.5523 2 12C2 10.8954 2.89543 10 4 10C4.55228 10 5 10.4477 5 11V12Z"
-            fill="currentColor"
-            className="text-blue-600"
-          />
-          <path
-            d="M20 12C20 12.5523 20.4477 13 21 13C21.5523 13 22 12.5523 22 12C22 10.8954 21.1046 10 20 10C19.4477 10 19 10.4477 19 11V12Z"
-            fill="currentColor"
-            className="text-blue-600"
-          />
+          {/* Dumbbell handle */}
           <rect
-            x="5"
-            y="11.5"
-            width="14"
-            height="1"
-            rx="0.5"
-            fill="currentColor"
-            className="text-gray-600"
+            x="9"
+            y="11"
+            width="6"
+            height="2"
+            rx="1"
+            fill="black"
           />
-          <circle cx="3" cy="12" r="2" stroke="currentColor" strokeWidth="1" fill="none" className="text-blue-600" />
-          <circle cx="21" cy="12" r="2" stroke="currentColor" strokeWidth="1" fill="none" className="text-blue-600" />
+          {/* Left weight */}
+          <rect
+            x="3"
+            y="8"
+            width="8"
+            height="8"
+            rx="1"
+            fill="black"
+          />
+          {/* Right weight */}
+          <rect
+            x="13"
+            y="8"
+            width="8"
+            height="8"
+            rx="1"
+            fill="black"
+          />
         </svg>
       </div>
     </div>
