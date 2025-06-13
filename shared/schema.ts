@@ -119,28 +119,6 @@ export const nutritionGoals = pgTable("nutrition_goals", {
   dailyProtein: decimal("daily_protein", { precision: 6, scale: 2 }).notNull(),
   dailyCarbs: decimal("daily_carbs", { precision: 6, scale: 2 }).notNull(),
   dailyFat: decimal("daily_fat", { precision: 6, scale: 2 }).notNull(),
-  maintenanceCalories: integer("maintenance_calories"),
-  weightGoal: text("weight_goal", { enum: ["lose", "maintain", "gain"] }).default("maintain"),
-  activityLevel: text("activity_level", { enum: ["sedentary", "light", "moderate", "active", "very_active"] }).default("moderate"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-export const weightEntries = pgTable("weight_entries", {
-  id: serial("id").primaryKey(),
-  weight: decimal("weight", { precision: 5, scale: 2 }).notNull(), // in lbs or kg
-  unit: text("unit", { enum: ["lbs", "kg"] }).default("lbs"),
-  date: timestamp("date").notNull(),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-export const userProfile = pgTable("user_profile", {
-  id: serial("id").primaryKey(),
-  height: decimal("height", { precision: 5, scale: 2 }), // in inches or cm
-  heightUnit: text("height_unit", { enum: ["inches", "cm"] }).default("inches"),
-  age: integer("age"),
-  gender: text("gender", { enum: ["male", "female"] }).default("male"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -185,17 +163,6 @@ export const insertNutritionGoalSchema = createInsertSchema(nutritionGoals).omit
   updatedAt: true,
 });
 
-export const insertWeightEntrySchema = createInsertSchema(weightEntries).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertUserProfileSchema = createInsertSchema(userProfile).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
 export const insertMotivationalQuoteSchema = createInsertSchema(motivationalQuotes).omit({
   id: true,
   createdAt: true,
@@ -215,12 +182,6 @@ export type InsertRecipe = z.infer<typeof insertRecipeSchema>;
 
 export type NutritionGoal = typeof nutritionGoals.$inferSelect;
 export type InsertNutritionGoal = z.infer<typeof insertNutritionGoalSchema>;
-
-export type WeightEntry = typeof weightEntries.$inferSelect;
-export type InsertWeightEntry = z.infer<typeof insertWeightEntrySchema>;
-
-export type UserProfile = typeof userProfile.$inferSelect;
-export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
 
 export type MotivationalQuote = typeof motivationalQuotes.$inferSelect;
 export type InsertMotivationalQuote = z.infer<typeof insertMotivationalQuoteSchema>;
