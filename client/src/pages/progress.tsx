@@ -39,24 +39,6 @@ export default function ProgressPage() {
     },
   });
 
-  const { data: weightEntries = [] } = useQuery({
-    queryKey: ['weight-entries'],
-    queryFn: async () => {
-      const response = await fetch('/api/weight');
-      if (!response.ok) throw new Error('Failed to fetch weight entries');
-      return response.json();
-    },
-  });
-
-  const { data: bmiData } = useQuery({
-    queryKey: ['bmi'],
-    queryFn: async () => {
-      const response = await fetch('/api/bmi');
-      if (!response.ok) throw new Error('Failed to fetch BMI');
-      return response.json();
-    },
-  });
-
   const workoutProgress: WorkoutProgress[] = [
     { exercise: "Bench Press", previousWeight: 185, currentWeight: 205, improvement: 10.8 },
     { exercise: "Squat", previousWeight: 225, currentWeight: 255, improvement: 13.3 },
@@ -64,14 +46,12 @@ export default function ProgressPage() {
     { exercise: "Overhead Press", previousWeight: 115, currentWeight: 135, improvement: 17.4 },
   ];
 
-  const latestWeight = weightEntries[0];
   const currentStats = {
-    weight: latestWeight ? parseFloat(latestWeight.weight) : 180,
+    weight: 180,
     bodyFat: 12.5,
-    muscle: latestWeight ? parseFloat(latestWeight.weight) * 0.875 : 157.5,
+    muscle: 157.5,
     weeklyGoal: 4,
     workoutsCompleted: 3,
-    bmi: bmiData?.bmi || null,
   };
 
   if (isLoading) {
@@ -142,27 +122,10 @@ export default function ProgressPage() {
                 <CardDescription>Estimated</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900">{currentStats.muscle.toFixed(1)} lbs</div>
+                <div className="text-3xl font-bold text-gray-900">{currentStats.muscle} lbs</div>
                 <div className="text-sm text-green-600 mt-2">+3.2 lbs from last month</div>
               </CardContent>
             </Card>
-
-            {currentStats.bmi && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">BMI</CardTitle>
-                  <CardDescription>Body Mass Index</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-gray-900">{currentStats.bmi}</div>
-                  <div className="text-sm text-gray-600 mt-2">
-                    {currentStats.bmi < 18.5 ? 'Underweight' : 
-                     currentStats.bmi < 25 ? 'Normal' : 
-                     currentStats.bmi < 30 ? 'Overweight' : 'Obese'}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
 
           <Card>
