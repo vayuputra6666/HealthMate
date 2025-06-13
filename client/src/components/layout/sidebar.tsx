@@ -1,11 +1,12 @@
 import { Link, useLocation } from "wouter";
-import { BarChart3, Dumbbell, List, TrendingUp, History } from "lucide-react";
+import { BarChart3, Dumbbell, List, TrendingUp, History, Apple } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
   { name: "Workouts", href: "/workouts", icon: Dumbbell },
   { name: "Exercises", href: "/exercises", icon: List },
   { name: "Progress", href: "/progress", icon: TrendingUp },
+  { name: "Nutrition", href: "/nutrition", icon: Apple },
   { name: "History", href: "/history", icon: History },
 ];
 
