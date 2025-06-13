@@ -1,0 +1,57 @@
+[00:55:57.246] Running build in Washington, D.C., USA (East) – iad1
+[00:55:57.247] Build machine configuration: 2 cores, 8 GB
+[00:55:57.260] Cloning github.com/vayuputra6666/HealthMate (Branch: main, Commit: ff1dcb9)
+[00:55:57.269] Skipping build cache, deployment was triggered without cache.
+[00:55:57.628] Cloning completed: 367.000ms
+[00:55:58.279] Running "vercel build"
+[00:55:58.743] Vercel CLI 42.2.0
+[00:55:59.406] Running "install" command: `npm install`...
+[00:56:04.180] npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+[00:56:04.194] npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+[00:56:09.778] 
+[00:56:09.779] added 495 packages, and audited 496 packages in 10s
+[00:56:09.779] 
+[00:56:09.779] 64 packages are looking for funding
+[00:56:09.780]   run `npm fund` for details
+[00:56:09.824] 
+[00:56:09.824] 7 vulnerabilities (1 low, 6 moderate)
+[00:56:09.825] 
+[00:56:09.825] To address issues that do not require attention, run:
+[00:56:09.825]   npm audit fix
+[00:56:09.825] 
+[00:56:09.826] To address all issues (including breaking changes), run:
+[00:56:09.826]   npm audit fix --force
+[00:56:09.826] 
+[00:56:09.826] Run `npm audit` for details.
+[00:56:10.148] 
+[00:56:10.148] > rest-express@1.0.0 build
+[00:56:10.148] > npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+[00:56:10.148] 
+[00:56:10.737] [36mvite v5.4.14 [32mbuilding for production...[36m[39m
+[00:56:10.788] transforming...
+[00:56:11.058] Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+[00:56:11.058]   npx update-browserslist-db@latest
+[00:56:11.058]   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[00:56:19.169] [32m✓[39m 2638 modules transformed.
+[00:56:19.910] rendering chunks...
+[00:56:19.981] computing gzip size...
+[00:56:20.025] [2m../dist/public/[22m[32mindex.html                 [39m[1m[2m  0.66 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
+[00:56:20.025] [2m../dist/public/[22m[2massets/[22m[35mindex-1cAZciII.css  [39m[1m[2m 69.92 kB[22m[1m[22m[2m │ gzip:  11.85 kB[22m
+[00:56:20.025] [2m../dist/public/[22m[2massets/[22m[36mindex-BP6XS1H5.js   [39m[1m[33m956.96 kB[39m[22m[2m │ gzip: 277.52 kB[22m
+[00:56:20.026] [33m
+[00:56:20.026] (!) Some chunks are larger than 500 kB after minification. Consider:
+[00:56:20.026] - Using dynamic import() to code-split the application
+[00:56:20.026] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[00:56:20.026] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[00:56:20.027] [32m✓ built in 9.27s[39m
+[00:56:20.394] 
+[00:56:20.395]   dist/index.js  60.0kb
+[00:56:20.395] 
+[00:56:20.395] ⚡ Done in 8ms
+[00:56:20.474] Build Completed in /vercel/output [21s]
+[00:56:20.498] Deploying outputs...
+[00:56:21.673] 
+[00:56:21.852] Deployment completed
+[00:56:35.237] Uploading build cache [83.11 MB]...
+[00:56:36.186] Build cache uploaded: 947.381ms
+[00:56:38.502] Exiting build container
