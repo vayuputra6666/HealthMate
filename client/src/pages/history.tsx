@@ -1,10 +1,10 @@
-
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Dumbbell, TrendingUp } from "lucide-react";
+import { Calendar, Clock, Dumbbell, TrendingUp, History } from "lucide-react";
+import { LoadingState, EmptyState } from "@/components/ui/loading";
 
 interface WorkoutHistory {
   id: number;
@@ -17,95 +17,44 @@ interface WorkoutHistory {
 }
 
 export default function History() {
-  const { data: workoutHistory, isLoading } = useQuery<WorkoutHistory[]>({
+  const { data: workoutHistory, isLoading, error } = useQuery({
     queryKey: ["/api/workout-history"],
-    queryFn: async () => {
-      const response = await fetch("/api/workout-history");
-      if (!response.ok) {
-        throw new Error("Failed to fetch workout history");
-      }
-      return response.json();
-    },
+    queryFn: () => fetch("/api/workout-history").then((res) => res.json()),
   });
 
-  const mockHistory: WorkoutHistory[] = [
-    {
-      id: 1,
-      name: "Push Day",
-      date: "2024-01-15",
-      duration: 75,
-      exercises: 6,
-      totalVolume: 12500,
-      notes: "Great session, felt strong on bench press"
-    },
-    {
-      id: 2,
-      name: "Pull Day",
-      date: "2024-01-13",
-      duration: 68,
-      exercises: 5,
-      totalVolume: 11200,
-    },
-    {
-      id: 3,
-      name: "Leg Day",
-      date: "2024-01-11",
-      duration: 82,
-      exercises: 7,
-      totalVolume: 15300,
-      notes: "New PR on squats!"
-    },
-    {
-      id: 4,
-      name: "Upper Body",
-      date: "2024-01-09",
-      duration: 70,
-      exercises: 6,
-      totalVolume: 10800,
-    },
-    {
-      id: 5,
-      name: "Full Body",
-      date: "2024-01-07",
-      duration: 90,
-      exercises: 8,
-      totalVolume: 13600,
-    },
-  ];
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-  const formatDuration = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-  };
-
   if (isLoading) {
+    return <LoadingState message="Loading workout history..." />;
+  }
+
+  if (error) {
     return (
-      <div className="p-4 md:p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Workout History</h2>
-        <div className="space-y-4">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-5 bg-gray-200 rounded w-1/3 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-16 bg-gray-200 rounded"></div>
-              </CardContent>
-            </Card>
-          ))}
+      <EmptyState
+        title="Failed to load workout history"
+        description="There was an error loading your workout history. Please try again."
+        icon={<Dumbbell className="w-12 h-12" />}
+        action={<Button onClick={() => window.location.reload()}>Retry</Button>}
+      />
+    );
+  }
+
+  if (!workoutHistory || workoutHistory.length === 0) {
+    return (
+      <div className="container mx-auto px-6 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">Workout History</h1>
+          <p className="text-muted-foreground mt-2">Track your fitness journey over time</p>
         </div>
+
+        <EmptyState
+          title="No workout history yet"
+          description="Complete your first workout to start building your fitness history."
+          icon={<TrendingUp className="w-12 h-12" />}
+          action={
+            <Button onClick={() => window.location.href = "/workouts"}>
+              Start Your First Workout
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -126,7 +75,7 @@ export default function History() {
       </div>
 
       <div className="space-y-4">
-        {mockHistory.map((workout) => (
+        {workoutHistory.map((workout) => (
           <Card key={workout.id} className="hover:shadow-md transition-shadow">
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -168,7 +117,7 @@ export default function History() {
                   </Badge>
                 </div>
               </div>
-              
+
               {workout.notes && (
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-sm text-gray-700">
@@ -192,3 +141,64 @@ export default function History() {
     </div>
   );
 }
+
+const mockHistory: WorkoutHistory[] = [
+  {
+    id: 1,
+    name: "Push Day",
+    date: "2024-01-15",
+    duration: 75,
+    exercises: 6,
+    totalVolume: 12500,
+    notes: "Great session, felt strong on bench press"
+  },
+  {
+    id: 2,
+    name: "Pull Day",
+    date: "2024-01-13",
+    duration: 68,
+    exercises: 5,
+    totalVolume: 11200,
+  },
+  {
+    id: 3,
+    name: "Leg Day",
+    date: "2024-01-11",
+    duration: 82,
+    exercises: 7,
+    totalVolume: 15300,
+    notes: "New PR on squats!"
+  },
+  {
+    id: 4,
+    name: "Upper Body",
+    date: "2024-01-09",
+    duration: 70,
+    exercises: 6,
+    totalVolume: 10800,
+  },
+  {
+    id: 5,
+    name: "Full Body",
+    date: "2024-01-07",
+    duration: 90,
+    exercises: 8,
+    totalVolume: 13600,
+  },
+];
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+};
+
+const formatDuration = (minutes: number) => {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+};

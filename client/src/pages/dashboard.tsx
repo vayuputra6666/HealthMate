@@ -6,9 +6,23 @@ import RecentWorkouts from "@/components/dashboard/recent-workouts";
 import QuickActions from "@/components/dashboard/quick-actions";
 import NewWorkoutModal from "@/components/workout/new-workout-modal";
 import TodaysMuscleActivation from "@/components/body-visualization/todays-muscle-activation";
-
+import { useQuery } from "@tanstack/react-query";
+import { LoadingState } from "@/components/ui/loading";
 export default function Dashboard() {
   const [showNewWorkoutModal, setShowNewWorkoutModal] = useState(false);
+    const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ["/api/stats"],
+    queryFn: () => fetch("/api/stats").then((res) => res.json()),
+  });
+
+  const { data: workouts, isLoading: workoutsLoading } = useQuery({
+    queryKey: ["/api/workouts"],
+    queryFn: () => fetch("/api/workouts").then((res) => res.json()),
+  });
+
+  if (statsLoading || workoutsLoading) {
+    return <LoadingState message="Loading your dashboard..." />;
+  }
 
   return (
     <div className="p-4 md:p-6">
@@ -33,7 +47,7 @@ export default function Dashboard() {
           <RecentWorkouts />
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
         <QuickActions />
       </div>

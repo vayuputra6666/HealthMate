@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,6 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+
+import { Plus, Apple, Target, TrendingUp } from "lucide-react";
+import { LoadingState, EmptyState, LoadingSpinner } from "@/components/ui/loading";
 
 interface Meal {
   id: number;
@@ -107,7 +110,7 @@ export default function Nutrition() {
     tags: [""]
   });
 
-  const { data: meals = [] } = useQuery<Meal[]>({
+  const { data: meals, isLoading: mealsLoading } = useQuery<Meal[]>({
     queryKey: ['meals', selectedDate],
     queryFn: async () => {
       const response = await fetch(`/api/meals/${selectedDate}`);
@@ -116,7 +119,7 @@ export default function Nutrition() {
     },
   });
 
-  const { data: recipes = [] } = useQuery<Recipe[]>({
+  const { data: recipes, isLoading: recipesLoading } = useQuery<Recipe[]>({
     queryKey: ['recipes'],
     queryFn: async () => {
       const response = await fetch('/api/recipes');
@@ -125,7 +128,7 @@ export default function Nutrition() {
     },
   });
 
-  const { data: nutritionGoals } = useQuery<NutritionGoals>({
+  const { data: nutritionGoals, isLoading: goalsLoading } = useQuery<NutritionGoals>({
     queryKey: ['nutrition-goals'],
     queryFn: async () => {
       const response = await fetch('/api/nutrition-goals');
@@ -301,18 +304,22 @@ export default function Nutrition() {
     }
   };
 
-  const dailyTotals = meals.reduce((totals, meal) => ({
+  const dailyTotals = meals?.reduce((totals, meal) => ({
     calories: totals.calories + (meal.calories || 0),
     protein: totals.protein + (meal.protein || 0),
     carbs: totals.carbs + (meal.carbs || 0),
     fat: totals.fat + (meal.fat || 0),
   }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
 
-  const mealsByType = meals.reduce((acc, meal) => {
+  const mealsByType = meals?.reduce((acc, meal) => {
     if (!acc[meal.type]) acc[meal.type] = [];
     acc[meal.type].push(meal);
     return acc;
   }, {} as Record<string, Meal[]>);
+
+    if (mealsLoading || goalsLoading || recipesLoading) {
+    return <LoadingState message="Loading nutrition data..." />;
+  }
 
   return (
     <div className="p-4 md:p-6">
@@ -352,41 +359,41 @@ export default function Nutrition() {
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{dailyTotals.calories}</div>
+                    <div className="text-2xl font-bold text-blue-600">{dailyTotals?.calories}</div>
                     <div className="text-sm text-gray-500">Calories</div>
                     {nutritionGoals && (
                       <Progress 
-                        value={(dailyTotals.calories / nutritionGoals.dailyCalories) * 100} 
+                        value={((dailyTotals?.calories || 0) / nutritionGoals.dailyCalories) * 100} 
                         className="mt-2"
                       />
                     )}
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{dailyTotals.protein.toFixed(1)}g</div>
+                    <div className="text-2xl font-bold text-green-600">{dailyTotals?.protein?.toFixed(1)}g</div>
                     <div className="text-sm text-gray-500">Protein</div>
                     {nutritionGoals && (
                       <Progress 
-                        value={(dailyTotals.protein / nutritionGoals.dailyProtein) * 100} 
+                        value={((dailyTotals?.protein || 0) / nutritionGoals.dailyProtein) * 100} 
                         className="mt-2"
                       />
                     )}
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-orange-600">{dailyTotals.carbs.toFixed(1)}g</div>
+                    <div className="text-2xl font-bold text-orange-600">{dailyTotals?.carbs?.toFixed(1)}g</div>
                     <div className="text-sm text-gray-500">Carbs</div>
                     {nutritionGoals && (
                       <Progress 
-                        value={(dailyTotals.carbs / nutritionGoals.dailyCarbs) * 100} 
+                        value={((dailyTotals?.carbs || 0) / nutritionGoals.dailyCarbs) * 100} 
                         className="mt-2"
                       />
                     )}
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-600">{dailyTotals.fat.toFixed(1)}g</div>
+                    <div className="text-2xl font-bold text-purple-600">{dailyTotals?.fat?.toFixed(1)}g</div>
                     <div className="text-sm text-gray-500">Fat</div>
                     {nutritionGoals && (
                       <Progress 
-                        value={(dailyTotals.fat / nutritionGoals.dailyFat) * 100} 
+                        value={((dailyTotals?.fat || 0) / nutritionGoals.dailyFat) * 100} 
                         className="mt-2"
                       />
                     )}
@@ -420,16 +427,30 @@ export default function Nutrition() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-2">
-                      {mealsByType[mealType]?.map((meal) => (
-                        <div key={meal.id} className="p-2 bg-gray-50 rounded text-sm">
-                          <div className="font-medium">{meal.name}</div>
-                          <div className="text-gray-500 text-xs">
-                            {meal.calories} cal • {meal.protein}p • {meal.carbs}c • {meal.fat}f
-                          </div>
-                        </div>
-                      )) || <div className="text-gray-400 text-sm">No meals added</div>}
+                  <div className="space-y-2">
+                {!mealsByType || Object.keys(mealsByType).length === 0 ? (
+                  <EmptyState
+                    title={`No ${mealType} logged today`}
+                    description={`Add your first ${mealType} to start tracking.`}
+                    icon={<Apple className="w-8 h-8" />}
+                    action={
+                      <Button onClick={() => document.getElementById('meal-name')?.focus()}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Your First Meal
+                      </Button>
+                    }
+                  />
+                ) : (
+                  mealsByType[mealType]?.map((meal) => (
+                    <div key={meal.id} className="p-2 bg-gray-50 rounded text-sm">
+                      <div className="font-medium">{meal.name}</div>
+                      <div className="text-gray-500 text-xs">
+                        {meal.calories} cal • {meal.protein}p • {meal.carbs}c • {meal.fat}f
+                      </div>
                     </div>
+                  ))
+                )}
+              </div>
                   </CardContent>
                 </Card>
               ))}
@@ -602,15 +623,21 @@ export default function Nutrition() {
           <TabsContent value="recipes" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Recipe Database</h2>
+                            {recipesLoading ? (
+                  <LoadingSpinner />
+                ) : (
               <Dialog open={showRecipeModal} onOpenChange={setShowRecipeModal}>
                 <DialogTrigger asChild>
                   <Button>Add Recipe</Button>
                 </DialogTrigger>
               </Dialog>
+                )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recipes.map((recipe) => (
+                            {recipesLoading ? (
+                  <LoadingSpinner />
+                ) : recipes?.map((recipe) => (
                 <Card key={recipe.id}>
                   <CardHeader>
                     <CardTitle className="text-lg">{recipe.name}</CardTitle>
@@ -650,7 +677,7 @@ export default function Nutrition() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                                ))}
             </div>
           </TabsContent>
 
@@ -661,7 +688,10 @@ export default function Nutrition() {
                 <CardDescription>Set your daily macro and calorie targets</CardDescription>
               </CardHeader>
               <CardContent>
-                {nutritionGoals ? (
+                 {goalsLoading ? (
+                  <LoadingSpinner />
+                ) : 
+                nutritionGoals ? (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="text-center p-4 border rounded-lg">
                       <div className="text-2xl font-bold">{nutritionGoals.dailyCalories}</div>
@@ -717,12 +747,12 @@ export default function Nutrition() {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="meal-name">Meal Name</Label>
-                <Input
-                  id="meal-name"
-                  value={newMeal.name}
-                  onChange={(e) => setNewMeal(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g., Grilled Chicken Salad"
-                />
+                                <Input
+                    id="meal-name"
+                    placeholder="Meal name"
+                    value={newMeal.name}
+                    onChange={(e) => setNewMeal({ ...newMeal, name: e.target.value })}
+                  />
               </div>
 
               <div>
@@ -844,6 +874,7 @@ export default function Nutrition() {
                   id="weight-date"
                   type="date"
                   value={newWeight.date}
+                  ```python
                   onChange={(e) => setNewWeight(prev => ({ ...prev, date: e.target.value }))}
                 />
               </div>
