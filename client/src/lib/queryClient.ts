@@ -1,4 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -49,9 +50,42 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       staleTime: Infinity,
       retry: false,
+      retry: (failureCount, error: any) => {
+        // Don't retry on 4xx errors (client errors)
+        if (error?.status >= 400 && error?.status < 500) {
+          return false;
+        }
+        // Retry up to 3 times for other errors
+        return failureCount < 3;
+      },
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      onError: (error: any) => {
+        console.error('Query error:', error);
+        if (error?.message?.includes('JSON') || error?.message?.includes('DOCTYPE')) {
+          toast({
+            title: "Connection Error",
+            description: "Unable to connect to the server. Please refresh the page.",
+            variant: "destructive",
+          });
+        } else if (error?.status === 0) {
+          toast({
+            title: "Network Error",
+            description: "Please check your internet connection.",
+            variant: "destructive",
+          });
+        }
+      },
     },
     mutations: {
       retry: false,
+      onError: (error: any) => {
+        console.error('Mutation error:', error);
+        toast({
+          title: "Error",
+          description: error?.message || "An unexpected error occurred",
+          variant: "destructive",
+        });
+      },
     },
   },
 });

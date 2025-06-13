@@ -13,6 +13,34 @@ import {
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Global error handler middleware
+  app.use((err: any, req: any, res: any, next: any) => {
+    console.error('API Error:', err);
+    
+    // Ensure we always send JSON responses
+    res.setHeader('Content-Type', 'application/json');
+    
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ 
+        message: "Validation error", 
+        errors: err.errors 
+      });
+    }
+    
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+    
+    res.status(status).json({ 
+      message,
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    });
+  });
+
+  // Health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
   // Exercise routes
   app.get("/api/exercises", async (req, res) => {
     try {

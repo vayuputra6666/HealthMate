@@ -4,6 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Workouts from "@/pages/workouts";
@@ -35,9 +36,10 @@ function App() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <BrowserRouter>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <BrowserRouter>
           <div className="flex h-screen bg-gray-50">
             <Sidebar />
             <div className="flex-1 flex flex-col overflow-hidden">
@@ -62,9 +64,10 @@ function App() {
             <MobileNav open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
           </div>
         </BrowserRouter>
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
+          <Toaster />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
