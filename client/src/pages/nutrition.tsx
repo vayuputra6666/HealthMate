@@ -1,7 +1,3 @@
-The code implements a comprehensive nutrition page with meal tracking, recipe database, nutrition goals, and grocery list features, along with modals for adding meals and recipes.
-```
-
-```replit_final_file
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
