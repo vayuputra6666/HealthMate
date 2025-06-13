@@ -1,188 +1,245 @@
-import React from "react";
+
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { TrendingUp, Target, Award, Calendar, Weight, Dumbbell } from "lucide-react";
+import { LoadingState, EmptyState } from "@/components/ui/loading";
 
-interface ProgressData {
-  id: number;
-  date: string;
-  weight: number;
-  bodyFat: number;
-  muscle: number;
-  measurements: {
-    chest: number;
-    waist: number;
-    arms: number;
-    thighs: number;
-  };
-}
-
-interface WorkoutProgress {
-  exercise: string;
-  previousWeight: number;
-  currentWeight: number;
-  improvement: number;
-}
-
-export default function ProgressPage() {
-  const { data: progressData, isLoading } = useQuery<ProgressData[]>({
-    queryKey: ["/api/progress"],
-    queryFn: async () => {
-      const response = await fetch("/api/progress");
-      if (!response.ok) {
-        throw new Error("Failed to fetch progress data");
-      }
-      return response.json();
-    },
+export default function Progress() {
+  const { data: workouts, isLoading: workoutsLoading } = useQuery({
+    queryKey: ["/api/workouts"],
+    queryFn: () => fetch("/api/workouts").then((res) => res.json()),
   });
 
-  const { data: weightEntries = [] } = useQuery({
-    queryKey: ['weight-entries'],
-    queryFn: async () => {
-      const response = await fetch('/api/weight');
-      if (!response.ok) throw new Error('Failed to fetch weight entries');
-      return response.json();
-    },
+  const { data: weightData, isLoading: weightLoading } = useQuery({
+    queryKey: ["/api/weight"],
+    queryFn: () => fetch("/api/weight").then((res) => res.json()),
   });
 
-  const { data: bmiData } = useQuery({
-    queryKey: ['bmi'],
-    queryFn: async () => {
-      const response = await fetch('/api/bmi');
-      if (!response.ok) throw new Error('Failed to fetch BMI');
-      return response.json();
-    },
+  const { data: stats } = useQuery({
+    queryKey: ["/api/stats"],
+    queryFn: () => fetch("/api/stats").then((res) => res.json()),
   });
 
-  const workoutProgress: WorkoutProgress[] = [
-    { exercise: "Bench Press", previousWeight: 185, currentWeight: 205, improvement: 10.8 },
-    { exercise: "Squat", previousWeight: 225, currentWeight: 255, improvement: 13.3 },
-    { exercise: "Deadlift", previousWeight: 275, currentWeight: 315, improvement: 14.5 },
-    { exercise: "Overhead Press", previousWeight: 115, currentWeight: 135, improvement: 17.4 },
-  ];
+  // Calculate workout frequency (last 30 days)
+  const calculateWorkoutFrequency = () => {
+    if (!workouts) return [];
+    
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const recentWorkouts = workouts.filter((workout: any) => 
+      new Date(workout.date) >= thirtyDaysAgo
+    );
 
-  const latestWeight = weightEntries[0];
-  const currentStats = {
-    weight: latestWeight ? parseFloat(latestWeight.weight) : 180,
-    bodyFat: 12.5,
-    muscle: latestWeight ? parseFloat(latestWeight.weight) * 0.875 : 157.5,
-    weeklyGoal: 4,
-    workoutsCompleted: 3,
-    bmi: bmiData?.bmi || null,
+    const frequencyData = [];
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dayWorkouts = recentWorkouts.filter((workout: any) => 
+        new Date(workout.date).toDateString() === date.toDateString()
+      );
+      
+      frequencyData.push({
+        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        workouts: dayWorkouts.length,
+      });
+    }
+    
+    return frequencyData;
   };
 
-  if (isLoading) {
+  // Calculate strength progress
+  const calculateStrengthProgress = () => {
+    if (!workouts) return [];
+
+    const exerciseMaxes: { [key: string]: { weight: number; date: string }[] } = {};
+    
+    workouts.forEach((workout: any) => {
+      workout.exercises?.forEach((exercise: any) => {
+        const exerciseName = exercise.exercise?.name || 'Unknown Exercise';
+        if (!exerciseMaxes[exerciseName]) {
+          exerciseMaxes[exerciseName] = [];
+        }
+        
+        exercise.sets?.forEach((set: any) => {
+          if (set.weight && set.reps) {
+            exerciseMaxes[exerciseName].push({
+              weight: parseFloat(set.weight),
+              date: workout.date
+            });
+          }
+        });
+      });
+    });
+
+    return Object.entries(exerciseMaxes)
+      .map(([exercise, records]) => {
+        if (records.length < 2) return null;
+        
+        records.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        const firstRecord = records[0];
+        const lastRecord = records[records.length - 1];
+        const improvement = ((lastRecord.weight - firstRecord.weight) / firstRecord.weight) * 100;
+        
+        return {
+          exercise,
+          previousWeight: firstRecord.weight,
+          currentWeight: lastRecord.weight,
+          improvement: Math.round(improvement * 10) / 10,
+          totalSessions: records.length
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => (b?.improvement || 0) - (a?.improvement || 0))
+      .slice(0, 6);
+  };
+
+  // Calculate volume progression
+  const calculateVolumeProgression = () => {
+    if (!workouts) return [];
+
+    const last12Weeks = [];
+    for (let i = 11; i >= 0; i--) {
+      const weekStart = new Date();
+      weekStart.setDate(weekStart.getDate() - (i * 7));
+      weekStart.setHours(0, 0, 0, 0);
+      
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      weekEnd.setHours(23, 59, 59, 999);
+
+      const weekWorkouts = workouts.filter((workout: any) => {
+        const workoutDate = new Date(workout.date);
+        return workoutDate >= weekStart && workoutDate <= weekEnd;
+      });
+
+      let totalVolume = 0;
+      weekWorkouts.forEach((workout: any) => {
+        workout.exercises?.forEach((exercise: any) => {
+          exercise.sets?.forEach((set: any) => {
+            if (set.weight && set.reps) {
+              totalVolume += parseFloat(set.weight) * set.reps;
+            }
+          });
+        });
+      });
+
+      last12Weeks.push({
+        week: `Week ${12 - i}`,
+        volume: Math.round(totalVolume),
+        workouts: weekWorkouts.length
+      });
+    }
+
+    return last12Weeks;
+  };
+
+  const workoutFrequency = calculateWorkoutFrequency();
+  const strengthProgress = calculateStrengthProgress();
+  const volumeProgression = calculateVolumeProgression();
+
+  const weightProgress = weightData?.map((entry: any) => ({
+    date: new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    weight: parseFloat(entry.weight),
+  })) || [];
+
+  if (workoutsLoading || weightLoading) {
+    return <LoadingState message="Loading progress data..." />;
+  }
+
+  if (!workouts || workouts.length === 0) {
     return (
-      <div className="p-4 md:p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Progress Tracking</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-16 bg-gray-200 rounded"></div>
-              </CardContent>
-            </Card>
-          ))}
+      <div className="container mx-auto px-6 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">Progress</h1>
+          <p className="text-muted-foreground mt-2">Track your fitness journey and improvements</p>
         </div>
+        
+        <EmptyState
+          title="No progress data yet"
+          description="Start logging workouts to see your progress and improvements over time."
+          icon={<TrendingUp className="w-12 h-12" />}
+        />
       </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Progress Tracking</h2>
-        <Badge variant="outline" className="text-green-600 border-green-600">
-          This Week: {currentStats.workoutsCompleted}/{currentStats.weeklyGoal} Workouts
-        </Badge>
+    <div className="container mx-auto px-6 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Progress</h1>
+        <p className="text-muted-foreground mt-2">Track your fitness journey and improvements</p>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Workouts</CardTitle>
+            <Dumbbell className="w-4 h-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{workouts.length}</div>
+            <p className="text-xs text-muted-foreground">All time</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">This Month</CardTitle>
+            <Calendar className="w-4 h-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {workouts.filter((w: any) => {
+                const workoutDate = new Date(w.date);
+                const thisMonth = new Date();
+                return workoutDate.getMonth() === thisMonth.getMonth() && 
+                       workoutDate.getFullYear() === thisMonth.getFullYear();
+              }).length}
+            </div>
+            <p className="text-xs text-muted-foreground">Workouts completed</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Current Weight</CardTitle>
+            <Weight className="w-4 h-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {weightData && weightData.length > 0 
+                ? `${weightData[weightData.length - 1].weight} ${weightData[weightData.length - 1].unit}`
+                : 'No data'
+              }
+            </div>
+            <p className="text-xs text-muted-foreground">Latest entry</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Best Streak</CardTitle>
+            <Award className="w-4 h-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">7</div>
+            <p className="text-xs text-muted-foreground">Days in a row</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Tabs defaultValue="strength" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="body">Body Stats</TabsTrigger>
           <TabsTrigger value="strength">Strength</TabsTrigger>
-          <TabsTrigger value="measurements">Measurements</TabsTrigger>
+          <TabsTrigger value="weight">Weight</TabsTrigger>
+          <TabsTrigger value="volume">Volume</TabsTrigger>
+          <TabsTrigger value="frequency">Frequency</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Current Weight</CardTitle>
-                <CardDescription>Last updated today</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-900">{currentStats.weight} lbs</div>
-                <div className="text-sm text-green-600 mt-2">+2.5 lbs from last month</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Body Fat %</CardTitle>
-                <CardDescription>Estimated</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-900">{currentStats.bodyFat}%</div>
-                <div className="text-sm text-green-600 mt-2">-0.8% from last month</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Muscle Mass</CardTitle>
-                <CardDescription>Estimated</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-900">{currentStats.muscle.toFixed(1)} lbs</div>
-                <div className="text-sm text-green-600 mt-2">+3.2 lbs from last month</div>
-              </CardContent>
-            </Card>
-
-            {currentStats.bmi && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">BMI</CardTitle>
-                  <CardDescription>Body Mass Index</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-gray-900">{currentStats.bmi}</div>
-                  <div className="text-sm text-gray-600 mt-2">
-                    {currentStats.bmi < 18.5 ? 'Underweight' : 
-                     currentStats.bmi < 25 ? 'Normal' : 
-                     currentStats.bmi < 30 ? 'Overweight' : 'Obese'}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Weekly Workout Progress</CardTitle>
-              <CardDescription>Track your consistency</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">This Week</span>
-                  <span className="text-sm text-gray-500">{currentStats.workoutsCompleted}/{currentStats.weeklyGoal}</span>
-                </div>
-                <Progress value={(currentStats.workoutsCompleted / currentStats.weeklyGoal) * 100} />
-                <div className="text-sm text-gray-600">
-                  {currentStats.weeklyGoal - currentStats.workoutsCompleted} workout{currentStats.weeklyGoal - currentStats.workoutsCompleted !== 1 ? 's' : ''} remaining this week
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="strength" className="space-y-6">
           <Card>
@@ -191,58 +248,101 @@ export default function ProgressPage() {
               <CardDescription>Your lifting improvements over time</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                {workoutProgress.map((exercise) => (
-                  <div key={exercise.exercise} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{exercise.exercise}</span>
-                      <Badge variant="secondary" className="text-green-600">
-                        +{exercise.improvement}%
-                      </Badge>
+              {strengthProgress.length > 0 ? (
+                <div className="space-y-6">
+                  {strengthProgress.map((exercise) => (
+                    <div key={exercise.exercise} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{exercise.exercise}</span>
+                        <Badge variant={exercise.improvement > 0 ? "default" : "secondary"} className="text-green-600">
+                          {exercise.improvement > 0 ? '+' : ''}{exercise.improvement}%
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-gray-600">
+                        <span>Previous: {exercise.previousWeight} lbs</span>
+                        <span>Current: {exercise.currentWeight} lbs</span>
+                      </div>
+                      <Progress value={Math.min(Math.abs(exercise.improvement) * 2, 100)} className="h-2" />
                     </div>
-                    <div className="flex items-center justify-between text-sm text-gray-600">
-                      <span>Previous: {exercise.previousWeight} lbs</span>
-                      <span>Current: {exercise.currentWeight} lbs</span>
-                    </div>
-                    <Progress value={exercise.improvement * 5} className="h-2" />
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  title="No strength data yet"
+                  description="Complete more workouts with the same exercises to see strength progress."
+                  icon={<TrendingUp className="w-8 h-8" />}
+                />
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="body" className="space-y-6">
-          <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-            <div className="text-4xl mb-4">📊</div>
-            <h3 className="text-lg font-semibold mb-2">Body Composition Tracking</h3>
-            <p className="text-gray-600 mb-4">
-              Detailed body composition analysis and progress charts coming soon!
-            </p>
-            <div className="flex flex-wrap justify-center gap-2">
-              <Badge variant="outline">Weight Trends</Badge>
-              <Badge variant="outline">Body Fat Analysis</Badge>
-              <Badge variant="outline">Muscle Growth</Badge>
-              <Badge variant="outline">Progress Photos</Badge>
-            </div>
-          </div>
+        <TabsContent value="weight" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Weight Progress</CardTitle>
+              <CardDescription>Your weight changes over time</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {weightProgress.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={weightProgress}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="weight" stroke="#2563eb" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyState
+                  title="No weight data yet"
+                  description="Start tracking your weight to see progress over time."
+                  icon={<Weight className="w-8 h-8" />}
+                />
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        <TabsContent value="measurements" className="space-y-6">
-          <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-            <div className="text-4xl mb-4">📏</div>
-            <h3 className="text-lg font-semibold mb-2">Body Measurements</h3>
-            <p className="text-gray-600 mb-4">
-              Track chest, waist, arms, and other measurements over time.
-            </p>
-            <div className="flex flex-wrap justify-center gap-2">
-              <Badge variant="outline">Chest</Badge>
-              <Badge variant="outline">Waist</Badge>
-              <Badge variant="outline">Arms</Badge>
-              <Badge variant="outline">Thighs</Badge>
-              <Badge variant="outline">Neck</Badge>
-            </div>
-          </div>
+        <TabsContent value="volume" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Training Volume</CardTitle>
+              <CardDescription>Your weekly training volume progression</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={volumeProgression}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="week" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="volume" fill="#2563eb" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="frequency" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Workout Frequency</CardTitle>
+              <CardDescription>Your daily workout consistency (last 30 days)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={workoutFrequency}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="workouts" fill="#10b981" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

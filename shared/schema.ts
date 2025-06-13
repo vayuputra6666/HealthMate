@@ -8,6 +8,8 @@ export const exercises = pgTable("exercises", {
   category: text("category").notNull(), // e.g., "chest", "legs", "back", etc.
   instructions: text("instructions"),
   muscleGroups: text("muscle_groups").array(), // muscles targeted by this exercise
+  equipment: text("equipment").array(), // equipment needed for this exercise
+  difficulty: text("difficulty", { enum: ["beginner", "intermediate", "advanced"] }).default("beginner"),
 });
 
 export const workouts = pgTable("workouts", {
@@ -41,6 +43,7 @@ export const insertExerciseSchema = createInsertSchema(exercises).omit({
   id: true,
 }).extend({
   muscleGroups: z.array(z.string()).optional(),
+  equipment: z.array(z.string()).optional(),
 });
 
 export const insertWorkoutSchema = createInsertSchema(workouts).omit({

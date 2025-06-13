@@ -1,429 +1,406 @@
-import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { Quote, Trophy, Target, Zap, Star, RefreshCw, CheckCircle } from "lucide-react";
+import { LoadingState, EmptyState } from "@/components/ui/loading";
+import { useToast } from "@/hooks/use-toast";
 
 interface MotivationalQuote {
   id: number;
   quote: string;
   author: string;
-  category: "motivation" | "fitness" | "nutrition" | "mindset";
+  category: string;
 }
 
 interface DailyChallenge {
   id: number;
   title: string;
   description: string;
-  type: "workout" | "nutrition" | "mindset" | "habit";
-  difficulty: "easy" | "medium" | "hard";
+  type: string;
+  difficulty: string;
   points: number;
   date: string;
 }
 
-const motivationalImages = [
-  {
-    id: 1,
-    url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=600&fit=crop",
-    title: "Push Your Limits",
-    description: "Every workout is a step closer to your goals"
-  },
-  {
-    id: 2,
-    url: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&h=600&fit=crop",
-    title: "Consistency is Key",
-    description: "Small daily improvements lead to stunning results"
-  },
-  {
-    id: 3,
-    url: "https://images.unsplash.com/photo-1549476464-37392f717541?w=800&h=600&fit=crop",
-    title: "Mind Over Matter",
-    description: "Your only limit is your mindset"
-  }
-];
-
-const successStories = [
-  {
-    id: 1,
-    name: "Sarah M.",
-    achievement: "Lost 30 lbs in 6 months",
-    story: "Started with just 10-minute workouts and gradually built up. The key was consistency and not giving up when progress seemed slow.",
-    before: "180 lbs",
-    after: "150 lbs",
-    timeframe: "6 months"
-  },
-  {
-    id: 2,
-    name: "Mike T.",
-    achievement: "Gained 20 lbs of muscle",
-    story: "Focused on compound movements and proper nutrition. Tracked everything and stayed patient with the process.",
-    before: "140 lbs",
-    after: "160 lbs",
-    timeframe: "8 months"
-  },
-  {
-    id: 3,
-    name: "Emma K.",
-    achievement: "Completed first marathon",
-    story: "Went from couch to 26.2 miles. Started with a couch-to-5K program and gradually increased distance.",
-    before: "Sedentary",
-    after: "Marathon finisher",
-    timeframe: "12 months"
-  }
-];
-
-const fitnessExperts = [
-  {
-    id: 1,
-    name: "Dr. Fitness Pro",
-    title: "Exercise Physiologist",
-    tip: "Focus on progressive overload - gradually increase weight, reps, or time to keep challenging your body.",
-    specialty: "Strength Training"
-  },
-  {
-    id: 2,
-    name: "Nutrition Coach Alex",
-    title: "Certified Nutritionist",
-    tip: "Eat protein within 30 minutes post-workout to maximize muscle protein synthesis and recovery.",
-    specialty: "Sports Nutrition"
-  },
-  {
-    id: 3,
-    name: "Mindset Mentor Lisa",
-    title: "Sports Psychologist",
-    tip: "Visualize your success before each workout. Mental preparation is just as important as physical preparation.",
-    specialty: "Mental Performance"
-  }
-];
-
 export default function Motivation() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [completedChallenges, setCompletedChallenges] = useState<number[]>([]);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const { data: dailyQuote, refetch: refetchQuote } = useQuery<MotivationalQuote>({
-    queryKey: ['motivational-quote', selectedCategory],
-    queryFn: async () => {
-      const url = selectedCategory === "all" 
-        ? '/api/motivation/quote' 
-        : `/api/motivation/quote?category=${selectedCategory}`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Failed to fetch quote');
-      return response.json();
-    },
+  const { data: quote, isLoading: quoteLoading, refetch: refetchQuote } = useQuery({
+    queryKey: ["/api/motivation/quote"],
+    queryFn: () => fetch("/api/motivation/quote").then((res) => res.json()),
   });
 
-  const { data: todaysChallenge } = useQuery<DailyChallenge>({
-    queryKey: ['daily-challenge'],
-    queryFn: async () => {
-      const response = await fetch('/api/motivation/challenge');
-      if (!response.ok) throw new Error('Failed to fetch challenge');
-      return response.json();
-    },
+  const { data: todaysChallenge, isLoading: challengeLoading } = useQuery({
+    queryKey: ["/api/motivation/challenge"],
+    queryFn: () => fetch("/api/motivation/challenge").then((res) => res.json()),
   });
 
-  const { data: allChallenges = [] } = useQuery<DailyChallenge[]>({
-    queryKey: ['all-challenges'],
-    queryFn: async () => {
-      const response = await fetch('/api/motivation/challenges');
-      if (!response.ok) throw new Error('Failed to fetch challenges');
-      return response.json();
-    },
+  const { data: allChallenges, isLoading: challengesLoading } = useQuery({
+    queryKey: ["/api/motivation/challenges"],
+    queryFn: () => fetch("/api/motivation/challenges").then((res) => res.json()),
   });
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'easy': return 'bg-green-100 text-green-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'hard': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+  const { data: workouts } = useQuery({
+    queryKey: ["/api/workouts"],
+    queryFn: () => fetch("/api/workouts").then((res) => res.json()),
+  });
+
+  const { data: stats } = useQuery({
+    queryKey: ["/api/stats"],
+    queryFn: () => fetch("/api/stats").then((res) => res.json()),
+  });
+
+  const completeChallenge = (challengeId: number) => {
+    if (!completedChallenges.includes(challengeId)) {
+      setCompletedChallenges([...completedChallenges, challengeId]);
+      toast({ 
+        title: "Challenge Completed!", 
+        description: "Great job! You've earned points for completing this challenge." 
+      });
     }
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'workout': return '💪';
-      case 'nutrition': return '🥗';
-      case 'mindset': return '🧠';
-      case 'habit': return '⚡';
-      default: return '🎯';
-    }
+  const getNewQuote = () => {
+    refetchQuote();
+    toast({ title: "New quote loaded!" });
   };
+
+  // Calculate achievements
+  const calculateAchievements = () => {
+    if (!workouts) return [];
+
+    const achievements = [];
+    const workoutCount = workouts.length;
+    const thisWeekWorkouts = workouts.filter((w: any) => {
+      const workoutDate = new Date(w.date);
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      return workoutDate >= weekAgo;
+    }).length;
+
+    // Workout milestones
+    if (workoutCount >= 1) achievements.push({ title: "First Workout", description: "Completed your first workout", icon: "🎯", earned: true });
+    if (workoutCount >= 5) achievements.push({ title: "Getting Started", description: "Completed 5 workouts", icon: "💪", earned: true });
+    if (workoutCount >= 10) achievements.push({ title: "Double Digits", description: "Completed 10 workouts", icon: "🔥", earned: true });
+    if (workoutCount >= 25) achievements.push({ title: "Quarter Century", description: "Completed 25 workouts", icon: "🏆", earned: true });
+    if (workoutCount >= 50) achievements.push({ title: "Half Century", description: "Completed 50 workouts", icon: "🌟", earned: true });
+
+    // Weekly streaks
+    if (thisWeekWorkouts >= 3) achievements.push({ title: "Weekly Warrior", description: "3+ workouts this week", icon: "⚡", earned: true });
+    if (thisWeekWorkouts >= 5) achievements.push({ title: "Gym Crusher", description: "5+ workouts this week", icon: "🚀", earned: true });
+
+    // Add some upcoming achievements
+    if (workoutCount < 5) achievements.push({ title: "Getting Started", description: "Complete 5 workouts", icon: "💪", earned: false });
+    if (workoutCount < 10) achievements.push({ title: "Double Digits", description: "Complete 10 workouts", icon: "🔥", earned: false });
+    if (workoutCount < 25) achievements.push({ title: "Quarter Century", description: "Complete 25 workouts", icon: "🏆", earned: false });
+
+    return achievements;
+  };
+
+  const achievements = calculateAchievements();
+  const totalPoints = completedChallenges.length * 10; // 10 points per challenge
+
+  if (quoteLoading || challengeLoading) {
+    return <LoadingState message="Loading motivation..." />;
+  }
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">🚀 Motivation Center</h1>
-          <p className="text-gray-600">Stay inspired and motivated on your fitness journey</p>
-        </div>
+    <div className="container mx-auto px-6 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Motivation</h1>
+        <p className="text-muted-foreground mt-2">Stay motivated and track your fitness journey</p>
+      </div>
 
-        <Tabs defaultValue="quotes" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="quotes">Quotes</TabsTrigger>
-            <TabsTrigger value="challenges">Challenges</TabsTrigger>
-            <TabsTrigger value="images">Gallery</TabsTrigger>
-            <TabsTrigger value="stories">Success Stories</TabsTrigger>
-            <TabsTrigger value="experts">Expert Tips</TabsTrigger>
-            <TabsTrigger value="community">Community</TabsTrigger>
-          </TabsList>
+      {/* Points and Level */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Points</CardTitle>
+            <Star className="w-4 h-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalPoints}</div>
+            <p className="text-xs text-muted-foreground">From completed challenges</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Level</CardTitle>
+            <Trophy className="w-4 h-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{Math.floor(totalPoints / 100) + 1}</div>
+            <p className="text-xs text-muted-foreground">
+              {totalPoints % 100}/100 to next level
+            </p>
+            <Progress value={(totalPoints % 100)} className="mt-2" />
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Achievements</CardTitle>
+            <Target className="w-4 h-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {achievements.filter(a => a.earned).length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              of {achievements.length} unlocked
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
-          <TabsContent value="quotes" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Daily Inspiration</CardTitle>
-                    <CardDescription>Get motivated with powerful quotes</CardDescription>
-                  </div>
-                  <div className="flex gap-2">
-                    <select 
-                      className="px-3 py-1 border rounded-md text-sm"
-                      value={selectedCategory}
-                      onChange={(e) => setSelectedCategory(e.target.value)}
-                    >
-                      <option value="all">All Categories</option>
-                      <option value="motivation">Motivation</option>
-                      <option value="fitness">Fitness</option>
-                      <option value="nutrition">Nutrition</option>
-                      <option value="mindset">Mindset</option>
-                    </select>
-                    <Button onClick={() => refetchQuote()} size="sm">
-                      New Quote
-                    </Button>
+      <Tabs defaultValue="daily" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="daily">Daily</TabsTrigger>
+          <TabsTrigger value="challenges">Challenges</TabsTrigger>
+          <TabsTrigger value="achievements">Achievements</TabsTrigger>
+          <TabsTrigger value="quotes">Quotes</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="daily" className="space-y-6">
+          {/* Daily Quote */}
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle className="flex items-center gap-2">
+                  <Quote className="w-5 h-5" />
+                  Daily Motivation
+                </CardTitle>
+                <Button variant="outline" size="sm" onClick={getNewQuote}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  New Quote
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {quote ? (
+                <div className="space-y-4">
+                  <blockquote className="text-lg italic border-l-4 border-blue-500 pl-4">
+                    "{quote.quote}"
+                  </blockquote>
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-muted-foreground">— {quote.author}</p>
+                    <Badge variant="outline" className="capitalize">
+                      {quote.category}
+                    </Badge>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                {dailyQuote ? (
-                  <div className="text-center py-8">
-                    <blockquote className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 leading-relaxed">
-                      "{dailyQuote.quote}"
-                    </blockquote>
-                    <cite className="text-lg text-gray-600">
-                      — {dailyQuote.author || "Unknown"}
-                    </cite>
-                    <div className="mt-4">
-                      <Badge variant="secondary" className="capitalize">
-                        {dailyQuote.category}
-                      </Badge>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500">Loading inspirational quote...</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+              ) : (
+                <EmptyState
+                  title="No quote available"
+                  description="Try refreshing to get a motivational quote."
+                  icon={<Quote className="w-8 h-8" />}
+                  action={
+                    <Button onClick={getNewQuote}>
+                      Get Quote
+                    </Button>
+                  }
+                />
+              )}
+            </CardContent>
+          </Card>
 
-          <TabsContent value="challenges" className="space-y-6">
-            {/* Today's Challenge */}
-            {todaysChallenge && (
-              <Card className="border-2 border-blue-200 bg-blue-50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    🎯 Today's Challenge
-                    <Badge className={getDifficultyColor(todaysChallenge.difficulty)}>
+          {/* Today's Challenge */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5" />
+                Today's Challenge
+              </CardTitle>
+              <CardDescription>Complete this challenge to earn points</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {todaysChallenge ? (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold text-lg">{todaysChallenge.title}</h3>
+                    <p className="text-muted-foreground mt-1">{todaysChallenge.description}</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                    <Badge variant="outline" className="capitalize">
+                      {todaysChallenge.type}
+                    </Badge>
+                    <Badge variant={todaysChallenge.difficulty === 'hard' ? 'destructive' : todaysChallenge.difficulty === 'medium' ? 'default' : 'secondary'}>
                       {todaysChallenge.difficulty}
                     </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-start gap-4">
-                    <div className="text-4xl">
-                      {getTypeIcon(todaysChallenge.type)}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold mb-2">{todaysChallenge.title}</h3>
-                      <p className="text-gray-600 mb-4">{todaysChallenge.description}</p>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="capitalize">
-                          {todaysChallenge.type}
-                        </Badge>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">Reward:</span>
-                          <Badge variant="secondary">
-                            {todaysChallenge.points} points
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {todaysChallenge.points} points
+                    </span>
                   </div>
-                </CardContent>
-              </Card>
-            )}
 
-            {/* Challenge History */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Challenge Archive</CardTitle>
-                <CardDescription>Past challenges to keep you motivated</CardDescription>
-              </CardHeader>
-              <CardContent>
+                  <Button 
+                    onClick={() => completeChallenge(todaysChallenge.id)}
+                    disabled={completedChallenges.includes(todaysChallenge.id)}
+                    className="w-full"
+                  >
+                    {completedChallenges.includes(todaysChallenge.id) ? (
+                      <>
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Completed!
+                      </>
+                    ) : (
+                      "Mark as Complete"
+                    )}
+                  </Button>
+                </div>
+              ) : (
+                <EmptyState
+                  title="No challenge for today"
+                  description="Check back tomorrow for a new challenge."
+                  icon={<Zap className="w-8 h-8" />}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="challenges" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Challenges</CardTitle>
+              <CardDescription>Complete challenges to earn points and level up</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {allChallenges && allChallenges.length > 0 ? (
                 <div className="space-y-4">
-                  {allChallenges.slice(0, 10).map((challenge) => (
-                    <div key={challenge.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                      <div className="text-2xl">
-                        {getTypeIcon(challenge.type)}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold">{challenge.title}</h4>
-                        <p className="text-sm text-gray-600">{challenge.description}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={getDifficultyColor(challenge.difficulty)} variant="secondary">
-                          {challenge.difficulty}
-                        </Badge>
-                        <Badge variant="outline">
-                          {challenge.points} pts
-                        </Badge>
+                  {allChallenges.map((challenge: DailyChallenge) => (
+                    <div key={challenge.id} className="border rounded p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{challenge.title}</h3>
+                          <p className="text-sm text-muted-foreground mt-1">{challenge.description}</p>
+                          
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge variant="outline" className="capitalize text-xs">
+                              {challenge.type}
+                            </Badge>
+                            <Badge variant={challenge.difficulty === 'hard' ? 'destructive' : challenge.difficulty === 'medium' ? 'default' : 'secondary'} className="text-xs">
+                              {challenge.difficulty}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {challenge.points} points
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <Button 
+                          size="sm"
+                          onClick={() => completeChallenge(challenge.id)}
+                          disabled={completedChallenges.includes(challenge.id)}
+                          variant={completedChallenges.includes(challenge.id) ? "secondary" : "default"}
+                        >
+                          {completedChallenges.includes(challenge.id) ? (
+                            <>
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Done
+                            </>
+                          ) : (
+                            "Complete"
+                          )}
+                        </Button>
                       </div>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              ) : (
+                <EmptyState
+                  title="No challenges available"
+                  description="Check back later for new challenges."
+                  icon={<Zap className="w-8 h-8" />}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <TabsContent value="images" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {motivationalImages.map((image) => (
-                <Card key={image.id} className="overflow-hidden">
-                  <div className="aspect-video bg-gray-200 relative">
-                    <img 
-                      src={image.url} 
-                      alt={image.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                      <div className="text-center text-white p-4">
-                        <h3 className="text-xl font-bold mb-2">{image.title}</h3>
-                        <p className="text-sm opacity-90">{image.description}</p>
+        <TabsContent value="achievements" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Achievements</CardTitle>
+              <CardDescription>Unlock achievements by reaching fitness milestones</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                {achievements.map((achievement, index) => (
+                  <div 
+                    key={index} 
+                    className={`border rounded p-4 ${achievement.earned ? 'bg-green-50 border-green-200' : 'bg-gray-50'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="text-2xl">{achievement.icon}</div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold">{achievement.title}</h3>
+                        <p className="text-sm text-muted-foreground">{achievement.description}</p>
                       </div>
+                      {achievement.earned && (
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                      )}
                     </div>
                   </div>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <TabsContent value="stories" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {successStories.map((story) => (
-                <Card key={story.id}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      🏆 {story.name}
-                      <Badge variant="secondary">{story.timeframe}</Badge>
-                    </CardTitle>
-                    <CardDescription className="font-semibold text-green-600">
-                      {story.achievement}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-between text-sm">
-                        <div>
-                          <span className="text-gray-500">Before:</span>
-                          <div className="font-semibold">{story.before}</div>
-                        </div>
-                        <div className="text-center">
-                          <span className="text-gray-500">➜</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">After:</span>
-                          <div className="font-semibold">{story.after}</div>
-                        </div>
-                      </div>
-                      <p className="text-gray-600 text-sm leading-relaxed">
-                        "{story.story}"
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="experts" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {fitnessExperts.map((expert) => (
-                <Card key={expert.id}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      👨‍⚕️ {expert.name}
-                    </CardTitle>
-                    <CardDescription>
-                      {expert.title} • {expert.specialty}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
-                        <p className="text-sm font-medium text-blue-900">
-                          💡 Expert Tip
-                        </p>
-                        <p className="text-sm text-blue-800 mt-1">
-                          {expert.tip}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="community" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Community Support</CardTitle>
-                <CardDescription>Connect with fellow fitness enthusiasts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {/* Community Stats */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">1,234</div>
-                      <div className="text-sm text-gray-600">Active Members</div>
-                    </div>
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">5,678</div>
-                      <div className="text-sm text-gray-600">Workouts Shared</div>
-                    </div>
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <div className="text-2xl font-bold text-purple-600">892</div>
-                      <div className="text-sm text-gray-600">Success Stories</div>
-                    </div>
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <div className="text-2xl font-bold text-orange-600">156</div>
-                      <div className="text-sm text-gray-600">Challenges Completed</div>
+        <TabsContent value="quotes" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Motivational Quotes</CardTitle>
+              <CardDescription>Get inspired with fitness and motivation quotes</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* Current Quote */}
+                {quote && (
+                  <div className="border rounded p-6 bg-gradient-to-r from-blue-50 to-purple-50">
+                    <blockquote className="text-lg italic text-center">
+                      "{quote.quote}"
+                    </blockquote>
+                    <div className="text-center mt-4">
+                      <p className="text-sm text-muted-foreground">— {quote.author}</p>
+                      <Badge variant="outline" className="mt-2 capitalize">
+                        {quote.category}
+                      </Badge>
                     </div>
                   </div>
+                )}
 
-                  {/* Feature Coming Soon */}
-                  <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                    <div className="text-4xl mb-4">🚧</div>
-                    <h3 className="text-lg font-semibold mb-2">Community Features Coming Soon!</h3>
-                    <p className="text-gray-600 mb-4">
-                      Share your progress, motivate others, and get support from the GYM BRO community.
-                    </p>
-                    <div className="flex flex-wrap justify-center gap-2">
-                      <Badge variant="outline">Progress Sharing</Badge>
-                      <Badge variant="outline">Workout Buddies</Badge>
-                      <Badge variant="outline">Group Challenges</Badge>
-                      <Badge variant="outline">Achievement Badges</Badge>
-                    </div>
-                  </div>
+                {/* Quote Categories */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {['motivation', 'fitness', 'nutrition', 'mindset'].map((category) => (
+                    <Button
+                      key={category}
+                      variant="outline"
+                      className="h-20 flex flex-col"
+                      onClick={() => {
+                        fetch(`/api/motivation/quote?category=${category}`)
+                          .then(res => res.json())
+                          .then(() => refetchQuote());
+                      }}
+                    >
+                      <div className="capitalize font-medium">{category}</div>
+                      <div className="text-xs text-muted-foreground">Quotes</div>
+                    </Button>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

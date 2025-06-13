@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { BarChart3, Dumbbell, List, TrendingUp, History, Apple, Lightbulb } from "lucide-react";
 
@@ -19,7 +18,7 @@ export default function Sidebar() {
     <div className="hidden md:flex md:w-64 md:flex-col">
       <div className="flex-1 flex flex-col bg-white border-r border-gray-100">
         <div className="p-6">
-          <h1 className="text-xl font-bold text-gray-900">HealthMate</h1>
+          <h1 className="text-xl font-bold text-gray-900">Prime Young</h1>
         </div>
         <nav className="flex-1 px-4 pb-4 space-y-1">
           {navigation.map((item) => {
