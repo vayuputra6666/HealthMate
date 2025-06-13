@@ -10,18 +10,47 @@ import { useQuery } from "@tanstack/react-query";
 import { LoadingState } from "@/components/ui/loading";
 export default function Dashboard() {
   const [showNewWorkoutModal, setShowNewWorkoutModal] = useState(false);
-    const { data: stats, isLoading: statsLoading } = useQuery({
+    const { data: stats, isLoading: statsLoading, error: statsError } = useQuery({
     queryKey: ["/api/stats"],
-    queryFn: () => fetch("/api/stats").then((res) => res.json()),
+    queryFn: async () => {
+      const res = await fetch("/api/stats");
+      if (!res.ok) {
+        throw new Error(`Failed to fetch stats: ${res.status}`);
+      }
+      return res.json();
+    },
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const { data: workouts, isLoading: workoutsLoading } = useQuery({
+  const { data: workouts, isLoading: workoutsLoading, error: workoutsError } = useQuery({
     queryKey: ["/api/workouts"],
-    queryFn: () => fetch("/api/workouts").then((res) => res.json()),
+    queryFn: async () => {
+      const res = await fetch("/api/workouts");
+      if (!res.ok) {
+        throw new Error(`Failed to fetch workouts: ${res.status}`);
+      }
+      return res.json();
+    },
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   if (statsLoading || workoutsLoading) {
     return <LoadingState message="Loading your dashboard..." />;
+  }
+
+  if (statsError || workoutsError) {
+    return (
+      <div className="p-4 md:p-6">
+        <div className="text-center py-8">
+          <p className="text-red-600 mb-4">
+            Error loading dashboard: {statsError?.message || workoutsError?.message}
+          </p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    );
   }
 
   return (

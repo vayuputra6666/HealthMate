@@ -7,10 +7,36 @@ import { Calendar, Clock, Dumbbell, Plus } from "lucide-react";
 import { LoadingSpinner, EmptyState } from "@/components/ui/loading";
 
 export default function RecentWorkouts() {
-  const { data: workouts, isLoading } = useQuery({
+  const { data: workouts, isLoading, error } = useQuery({
     queryKey: ["/api/workouts"],
-    queryFn: () => fetch("/api/workouts").then((res) => res.json()),
+    queryFn: async () => {
+      const res = await fetch("/api/workouts");
+      if (!res.ok) {
+        throw new Error(`Failed to fetch workouts: ${res.status}`);
+      }
+      const data = await res.json();
+      console.log("Workouts data received:", data);
+      return data;
+    },
   });
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Dumbbell className="w-5 h-5" />
+            Recent Workouts
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-4 text-red-600">
+            Failed to load workouts: {error.message}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (isLoading) {
     return (
