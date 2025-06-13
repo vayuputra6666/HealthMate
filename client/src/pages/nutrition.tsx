@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
@@ -743,6 +743,9 @@ export default function Nutrition() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add Meal</DialogTitle>
+              <DialogDescription>
+                Add a new meal entry to track your daily nutrition intake.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -837,6 +840,9 @@ export default function Nutrition() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add Weight Entry</DialogTitle>
+              <DialogDescription>
+                Record your current weight to track your progress over time.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -874,7 +880,6 @@ export default function Nutrition() {
                   id="weight-date"
                   type="date"
                   value={newWeight.date}
-                  ```python
                   onChange={(e) => setNewWeight(prev => ({ ...prev, date: e.target.value }))}
                 />
               </div>
@@ -904,6 +909,9 @@ export default function Nutrition() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Update Profile</DialogTitle>
+              <DialogDescription>
+                Update your profile information to get accurate BMI and calorie calculations.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -977,6 +985,9 @@ export default function Nutrition() {
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Add Recipe</DialogTitle>
+              <DialogDescription>
+                Create a new recipe with ingredients, instructions, and nutritional information.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
