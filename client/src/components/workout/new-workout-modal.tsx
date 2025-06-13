@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, Plus } from "lucide-react";
 import { createWorkoutSchema, type CreateWorkout, type Exercise } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import ExerciseEntry from "./exercise-entry";
 
@@ -63,7 +63,14 @@ export default function NewWorkoutModal({ open, onOpenChange }: NewWorkoutModalP
 
   const createWorkoutMutation = useMutation({
     mutationFn: async (data: CreateWorkout) => {
-      const response = await apiRequest("POST", "/api/workouts", data);
+      const response = await fetch("/api/workouts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to create workout");
       return response.json();
     },
     onSuccess: () => {
@@ -135,7 +142,7 @@ export default function NewWorkoutModal({ open, onOpenChange }: NewWorkoutModalP
   };
 
   return (
-    <Dialog open={open} onOpenChange={(open) => !open && handleClose()}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>New Workout</DialogTitle>

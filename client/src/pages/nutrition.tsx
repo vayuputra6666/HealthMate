@@ -82,13 +82,20 @@ export default function Nutrition() {
   });
 
   const addMealMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (meal: { name: string; calories: number; protein: number; carbs: number; fat: number; date: Date; mealType: string }) => {
+      const mealData = {
+        ...meal,
+        date: meal.date.toISOString().split('T')[0], // Convert date to string format
+      };
       const response = await fetch("/api/meals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, date: new Date(selectedDate) }),
+        body: JSON.stringify(mealData),
       });
-      if (!response.ok) throw new Error("Failed to add meal");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add meal");
+      }
       return response.json();
     },
     onSuccess: () => {

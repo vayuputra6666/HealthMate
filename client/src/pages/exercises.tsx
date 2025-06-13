@@ -230,7 +230,7 @@ export default function Exercises() {
 
       <NewExerciseModal
         open={showNewExercise}
-        onOpenChange={setShowNewExercise}
+        onOpenChange={(open) => setShowNewExercise(open)}
       />
     </div>
   );

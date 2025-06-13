@@ -200,7 +200,7 @@ export default function Dashboard() {
 
       <NewWorkoutModal 
         open={showNewWorkoutModal} 
-        onClose={() => setShowNewWorkoutModal(false)} 
+        onOpenChange={setShowNewWorkoutModal} 
       />
     </div>
   );
