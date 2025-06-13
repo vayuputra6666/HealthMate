@@ -44,10 +44,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Exercise routes
   app.get("/api/exercises", async (req, res) => {
     try {
+      console.log("Fetching exercises...");
       const exercises = await storage.getAllExercises();
+      console.log(`Found ${exercises.length} exercises`);
       res.json(exercises);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch exercises" });
+      console.error("Failed to get exercises:", error);
+      res.status(500).json({ 
+        error: "Failed to get exercises",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
@@ -176,7 +182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         carbs: req.body.carbs || 0,
         fat: req.body.fat || 0,
       };
-      
+
       const mealData = insertMealSchema.parse(transformedData);
       const meal = await storage.createMeal(mealData);
       res.status(201).json(meal);

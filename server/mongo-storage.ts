@@ -1,4 +1,3 @@
-
 import { MongoClient, Db, Collection, ObjectId } from 'mongodb';
 import {
   type Exercise,
@@ -46,10 +45,10 @@ export class MongoStorage implements IStorage {
   constructor() {
     const mongoUrl = process.env.MONGODB_URL || 'mongodb://localhost:27017';
     const dbName = process.env.MONGODB_DB_NAME || 'fitness_app';
-    
+
     this.client = new MongoClient(mongoUrl);
     this.db = this.client.db(dbName);
-    
+
     // Initialize collections
     this.exercises = this.db.collection('exercises');
     this.workouts = this.db.collection('workouts');
@@ -65,9 +64,35 @@ export class MongoStorage implements IStorage {
   }
 
   async connect(): Promise<void> {
-    await this.client.connect();
-    console.log('Connected to MongoDB');
-    await this.initializeData();
+    try {
+      await this.client.connect();
+      console.log("Connected to MongoDB");
+      this.db = this.client.db("fitness_tracker");
+
+      // Initialize collections
+      this.exercises = this.db.collection<Exercise>("exercises");
+      this.workouts = this.db.collection<Workout>("workouts");
+      this.workoutExercises = this.db.collection<WorkoutExercise>("workout_exercises");
+      this.sets = this.db.collection<Set>("sets");
+      this.meals = this.db.collection<Meal>("meals");
+      this.recipes = this.db.collection<Recipe>("recipes");
+      this.nutritionGoals = this.db.collection<NutritionGoal>("nutrition_goals");
+      this.motivationalQuotes = this.db.collection<MotivationalQuote>("motivational_quotes");
+      this.dailyChallenges = this.db.collection<DailyChallenge>("daily_challenges");
+      this.weightEntries = this.db.collection<WeightEntry>("weight_entries");
+      this.userProfiles = this.db.collection<UserProfile>("user_profiles");
+
+      // Test the connection
+      await this.db.admin().ping();
+      console.log("MongoDB ping successful");
+
+      // Initialize with default data if collections are empty
+      await this.initializeData();
+    } catch (error) {
+      console.error("Failed to connect to MongoDB:", error);
+      console.error("Falling back to memory storage");
+      throw error;
+    }
   }
 
   async disconnect(): Promise<void> {
@@ -75,25 +100,40 @@ export class MongoStorage implements IStorage {
   }
 
   private async initializeData(): Promise<void> {
-    // Check if exercises collection is empty and initialize with sample data
-    const exerciseCount = await this.exercises.countDocuments();
-    if (exerciseCount === 0) {
-      await this.initializeExercises();
-    }
+    try {
+      console.log("Initializing MongoDB data...");
 
-    const recipeCount = await this.recipes.countDocuments();
-    if (recipeCount === 0) {
-      await this.initializeRecipes();
-    }
+      // Check if exercises exist, if not, initialize them
+      const exerciseCount = await this.exercises.countDocuments();
+      console.log(`Found ${exerciseCount} exercises in database`);
+      if (exerciseCount === 0) {
+        console.log("Initializing exercises...");
+        await this.initializeExercises();
+      }
 
-    const quoteCount = await this.motivationalQuotes.countDocuments();
-    if (quoteCount === 0) {
-      await this.initializeMotivationalQuotes();
-    }
+      // Initialize other collections similarly
+      const recipeCount = await this.recipes.countDocuments();
+      if (recipeCount === 0) {
+        console.log("Initializing recipes...");
+        await this.initializeRecipes();
+      }
 
-    const challengeCount = await this.dailyChallenges.countDocuments();
-    if (challengeCount === 0) {
-      await this.initializeDailyChallenges();
+      const quoteCount = await this.motivationalQuotes.countDocuments();
+      if (quoteCount === 0) {
+        console.log("Initializing quotes...");
+        await this.initializeMotivationalQuotes();
+      }
+
+      const challengeCount = await this.dailyChallenges.countDocuments();
+      if (challengeCount === 0) {
+        console.log("Initializing challenges...");
+        await this.initializeDailyChallenges();
+      }
+
+      console.log("MongoDB data initialization completed");
+    } catch (error) {
+      console.error("Failed to initialize data:", error);
+      throw error;
     }
   }
 
@@ -226,8 +266,20 @@ export class MongoStorage implements IStorage {
 
   // Exercise methods
   async getAllExercises(): Promise<Exercise[]> {
-    const docs = await this.exercises.find({}).toArray();
-    return docs.map(doc => ({ ...doc, id: doc._id.toString() }));
+    try {
+      if (!this.exercises) {
+        throw new Error("Exercises collection not initialized");
+      }
+      const exercises = await this.exercises.find({}).toArray();
+      console.log(`Retrieved ${exercises.length} exercises from MongoDB`);
+      return exercises.map(exercise => ({ 
+        ...exercise, 
+        id: exercise._id?.toString() || exercise.id 
+      }));
+    } catch (error) {
+      console.error("Failed to get exercises from MongoDB:", error);
+      throw error;
+    }
   }
 
   async getExerciseById(id: number): Promise<Exercise | undefined> {
@@ -243,7 +295,7 @@ export class MongoStorage implements IStorage {
       difficulty: exercise.difficulty ?? "beginner",
       equipment: exercise.equipment ?? []
     });
-    
+
     const doc = await this.exercises.findOne({ _id: result.insertedId });
     return { ...doc, id: doc._id.toString() };
   }
@@ -312,7 +364,7 @@ export class MongoStorage implements IStorage {
     const exercises = [];
     for (let i = 0; i < createWorkout.exercises.length; i++) {
       const exerciseData = createWorkout.exercises[i];
-      
+
       const workoutExerciseResult = await this.workoutExercises.insertOne({
         workoutId: parseInt(workoutId),
         exerciseId: exerciseData.exerciseId,
@@ -365,14 +417,14 @@ export class MongoStorage implements IStorage {
 
   async deleteWorkout(id: number): Promise<boolean> {
     const workoutExerciseDocs = await this.workoutExercises.find({ workoutId: id }).toArray();
-    
+
     for (const we of workoutExerciseDocs) {
       await this.sets.deleteMany({ workoutExerciseId: we._id.toString() });
     }
-    
+
     await this.workoutExercises.deleteMany({ workoutId: id });
     const result = await this.workouts.deleteOne({ _id: new ObjectId(id.toString()) });
-    
+
     return result.deletedCount > 0;
   }
 
@@ -425,7 +477,7 @@ export class MongoStorage implements IStorage {
       ...mealData,
       createdAt: new Date(),
     });
-    
+
     const doc = await this.meals.findOne({ _id: result.insertedId });
     return { ...doc, id: doc._id.toString() };
   }
@@ -477,7 +529,7 @@ export class MongoStorage implements IStorage {
       ...weightEntry,
       createdAt: new Date(),
     });
-    
+
     const doc = await this.weightEntries.findOne({ _id: result.insertedId });
     return { ...doc, id: doc._id.toString() };
   }
@@ -499,7 +551,7 @@ export class MongoStorage implements IStorage {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-    
+
     const doc = await this.userProfiles.findOne({ _id: result.insertedId });
     return { ...doc, id: doc._id.toString() };
   }
@@ -554,7 +606,7 @@ export class MongoStorage implements IStorage {
   async getRandomQuote(): Promise<MotivationalQuote | undefined> {
     const count = await this.motivationalQuotes.countDocuments();
     if (count === 0) return undefined;
-    
+
     const randomIndex = Math.floor(Math.random() * count);
     const doc = await this.motivationalQuotes.findOne({}, { skip: randomIndex });
     return doc ? { ...doc, id: doc._id.toString() } : undefined;

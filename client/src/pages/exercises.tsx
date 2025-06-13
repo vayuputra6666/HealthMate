@@ -27,7 +27,17 @@ export default function Exercises() {
 
   const { data: exercises, isLoading, error } = useQuery({
     queryKey: ["/api/exercises"],
-    queryFn: () => fetch("/api/exercises").then((res) => res.json()),
+    queryFn: async () => {
+      const res = await fetch("/api/exercises");
+      if (!res.ok) {
+        throw new Error(`Failed to fetch exercises: ${res.status} ${res.statusText}`);
+      }
+      const data = await res.json();
+      console.log("Exercises data:", data);
+      return data;
+    },
+    retry: 3,
+    retryDelay: 1000,
   });
 
   const filteredExercises = useMemo(() => {
@@ -63,13 +73,16 @@ export default function Exercises() {
   }
 
   if (error) {
+    console.error("Exercise loading error:", error);
     return (
-      <EmptyState
-        title="Failed to load exercises"
-        description="There was an error loading the exercise database. Please try again."
-        icon={<Dumbbell className="w-12 h-12" />}
-        action={<Button onClick={() => window.location.reload()}>Retry</Button>}
-      />
+      <div className="container mx-auto px-6 py-8">
+        <EmptyState
+          title="Failed to load exercises"
+          description={`There was an error loading the exercise database: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`}
+          icon={<Dumbbell className="w-12 h-12" />}
+          action={<Button onClick={() => window.location.reload()}>Retry</Button>}
+        />
+      </div>
     );
   }
 
@@ -139,10 +152,10 @@ export default function Exercises() {
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
               {categories.map((category) => (
-                      <SelectItem key={category} value={category} className="capitalize">
-                        {category}
-                      </SelectItem>
-                    ))}
+                <SelectItem key={`category-${category}`} value={category} className="capitalize">
+                  {category}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>

@@ -708,9 +708,23 @@ import { MongoStorage } from "./mongo-storage";
 // Choose storage implementation based on environment
 const useMongoDb = process.env.USE_MONGODB === 'true';
 
-export const storage = useMongoDb ? new MongoStorage() : new MemStorage();
+let storage: IStorage;
 
-// Initialize MongoDB connection if using MongoDB
-if (useMongoDb && storage instanceof MongoStorage) {
-  storage.connect().catch(console.error);
+if (useMongoDb) {
+  try {
+    const mongoStorage = new MongoStorage();
+    // Initialize MongoDB connection
+    mongoStorage.connect().catch((error) => {
+      console.error("MongoDB connection failed, falling back to memory storage:", error);
+      // Don't reassign here as it's already too late
+    });
+    storage = mongoStorage;
+  } catch (error) {
+    console.error("Failed to create MongoDB storage, using memory storage:", error);
+    storage = new MemStorage();
+  }
+} else {
+  storage = new MemStorage();
 }
+
+export { storage };
