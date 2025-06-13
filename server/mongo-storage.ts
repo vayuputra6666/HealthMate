@@ -67,7 +67,10 @@ export class MongoStorage implements IStorage {
     try {
       await this.client.connect();
       console.log("Connected to MongoDB");
-      this.db = this.client.db("fitness_tracker");
+      
+      // Use the database name from constructor
+      const dbName = process.env.MONGODB_DB_NAME || 'fitness_app';
+      this.db = this.client.db(dbName);
 
       // Initialize collections
       this.exercises = this.db.collection<Exercise>("exercises");
@@ -90,7 +93,7 @@ export class MongoStorage implements IStorage {
       await this.initializeData();
     } catch (error) {
       console.error("Failed to connect to MongoDB:", error);
-      console.error("Falling back to memory storage");
+      console.error("MongoDB connection failed, falling back to memory storage");
       throw error;
     }
   }
@@ -272,9 +275,10 @@ export class MongoStorage implements IStorage {
       }
       const exercises = await this.exercises.find({}).toArray();
       console.log(`Retrieved ${exercises.length} exercises from MongoDB`);
-      return exercises.map(exercise => ({ 
+      return exercises.map((exercise, index) => ({ 
         ...exercise, 
-        id: exercise._id?.toString() || exercise.id 
+        id: exercise.id || index + 1,
+        _id: undefined // Remove MongoDB _id field
       }));
     } catch (error) {
       console.error("Failed to get exercises from MongoDB:", error);

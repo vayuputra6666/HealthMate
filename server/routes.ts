@@ -45,11 +45,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/exercises", async (req, res) => {
     try {
       console.log("Fetching exercises...");
+      res.setHeader('Content-Type', 'application/json');
       const exercises = await storage.getAllExercises();
       console.log(`Found ${exercises.length} exercises`);
       res.json(exercises);
     } catch (error) {
       console.error("Failed to get exercises:", error);
+      res.setHeader('Content-Type', 'application/json');
       res.status(500).json({ 
         error: "Failed to get exercises",
         message: error instanceof Error ? error.message : "Unknown error"

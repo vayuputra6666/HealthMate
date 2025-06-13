@@ -25,19 +25,34 @@ export default function Exercises() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
   const [showNewExercise, setShowNewExercise] = useState(false);
 
-  const { data: exercises, isLoading, error } = useQuery({
-    queryKey: ["/api/exercises"],
+  const { data: exercises, isLoading, error, refetch } = useQuery({
+    queryKey: ['exercises'],
     queryFn: async () => {
-      const res = await fetch("/api/exercises");
-      if (!res.ok) {
-        throw new Error(`Failed to fetch exercises: ${res.status} ${res.statusText}`);
+      try {
+        const response = await fetch('/api/exercises');
+        const text = await response.text();
+        console.log('Exercises response:', text);
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch exercises: ${response.status} ${response.statusText}`);
+        }
+
+        // Try to parse as JSON
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (parseError) {
+          console.error('Failed to parse response as JSON:', text);
+          throw new Error('Server returned invalid JSON');
+        }
+
+        console.log('Exercises data:', data);
+        return data;
+      } catch (error) {
+        console.error('Exercise fetch error:', error);
+        throw error;
       }
-      const data = await res.json();
-      console.log("Exercises data:", data);
-      return data;
     },
-    retry: 3,
-    retryDelay: 1000,
   });
 
   const filteredExercises = useMemo(() => {
@@ -150,12 +165,12 @@ export default function Exercises() {
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={`category-${category}`} value={category} className="capitalize">
-                  {category}
-                </SelectItem>
-              ))}
+              <SelectItem key="all" value="all">All Categories</SelectItem>
+              <SelectItem key="chest" value="chest">Chest</SelectItem>
+              <SelectItem key="back" value="back">Back</SelectItem>
+              <SelectItem key="legs" value="legs">Legs</SelectItem>
+              <SelectItem key="shoulders" value="shoulders">Shoulders</SelectItem>
+              <SelectItem key="arms" value="arms">Arms</SelectItem>
             </SelectContent>
           </Select>
           <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>

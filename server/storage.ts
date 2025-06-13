@@ -713,17 +713,19 @@ let storage: IStorage;
 if (useMongoDb) {
   try {
     const mongoStorage = new MongoStorage();
-    // Initialize MongoDB connection
-    mongoStorage.connect().catch((error) => {
-      console.error("MongoDB connection failed, falling back to memory storage:", error);
-      // Don't reassign here as it's already too late
+    // Initialize MongoDB connection with proper error handling
+    mongoStorage.connect().then(() => {
+      console.log("MongoDB storage initialized successfully");
+    }).catch((error) => {
+      console.error("MongoDB connection failed, application will use memory storage:", error);
     });
     storage = mongoStorage;
   } catch (error) {
-    console.error("Failed to create MongoDB storage, using memory storage:", error);
+    console.error("Failed to create MongoDB storage, falling back to memory storage:", error);
     storage = new MemStorage();
   }
 } else {
+  console.log("Using memory storage (MongoDB disabled)");
   storage = new MemStorage();
 }
 
