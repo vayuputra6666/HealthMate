@@ -8,14 +8,14 @@ interface LoadingSpinnerProps {
 
 export function LoadingSpinner({ className, size = "md" }: LoadingSpinnerProps) {
   const sizeClasses = {
-    sm: "w-4 h-4",
-    md: "w-8 h-8", 
-    lg: "w-12 h-12"
+    sm: "w-8 h-8",
+    md: "w-16 h-16", 
+    lg: "w-24 h-24"
   };
 
   return (
     <div className={cn("flex items-center justify-center", className)}>
-      <div className={cn("animate-bounce", sizeClasses[size])}>
+      <div className={cn("animate-bounce-flip", sizeClasses[size])}>
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Dumbbell handle */}
           <rect
@@ -24,7 +24,7 @@ export function LoadingSpinner({ className, size = "md" }: LoadingSpinnerProps) 
             width="6"
             height="2"
             rx="1"
-            fill="black"
+            fill="currentColor"
           />
           {/* Left weight */}
           <rect
@@ -33,7 +33,7 @@ export function LoadingSpinner({ className, size = "md" }: LoadingSpinnerProps) 
             width="8"
             height="8"
             rx="1"
-            fill="black"
+            fill="currentColor"
           />
           {/* Right weight */}
           <rect
@@ -42,7 +42,7 @@ export function LoadingSpinner({ className, size = "md" }: LoadingSpinnerProps) 
             width="8"
             height="8"
             rx="1"
-            fill="black"
+            fill="currentColor"
           />
         </svg>
       </div>
@@ -57,7 +57,7 @@ interface LoadingProps {
 
 export function LoadingState({ className }: { className?: string }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center min-h-[200px] space-y-4", className)}>
+    <div className={cn("fixed inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm z-50", className)}>
       <LoadingSpinner size="lg" />
     </div>
   );

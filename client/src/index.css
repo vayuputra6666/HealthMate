@@ -2,6 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes bounce-flip {
+  0%, 100% {
+    transform: translateY(0) rotateY(0deg);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  25% {
+    transform: translateY(-25%) rotateY(90deg);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+  50% {
+    transform: translateY(-50%) rotateY(180deg);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  75% {
+    transform: translateY(-25%) rotateY(270deg);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.animate-bounce-flip {
+  animation: bounce-flip 2s infinite;
+}
+
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(240, 10%, 3.9%);
