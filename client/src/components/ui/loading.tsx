@@ -15,9 +15,9 @@ export function LoadingSpinner({ className, size = "md" }: LoadingSpinnerProps) 
 
   return (
     <div className={cn("flex items-center justify-center", className)}>
-      <div className={cn("animate-bounce-flip", sizeClasses[size])}>
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Dumbbell handle */}
+      <div className={cn("animate-spin-reverse", sizeClasses[size])}>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-lg">
+          {/* Dumbbell handle with 3D effect */}
           <rect
             x="9"
             y="11"
@@ -25,24 +25,70 @@ export function LoadingSpinner({ className, size = "md" }: LoadingSpinnerProps) 
             height="2"
             rx="1"
             fill="currentColor"
+            className="opacity-90"
           />
-          {/* Left weight */}
+          <rect
+            x="9"
+            y="11.5"
+            width="6"
+            height="1"
+            rx="0.5"
+            fill="white"
+            className="opacity-30"
+          />
+          
+          {/* Left weight with 3D layering */}
           <rect
             x="3"
             y="8"
             width="8"
             height="8"
-            rx="1"
+            rx="2"
             fill="currentColor"
+            className="opacity-95"
           />
-          {/* Right weight */}
+          <rect
+            x="3.5"
+            y="8.5"
+            width="7"
+            height="3"
+            rx="1.5"
+            fill="white"
+            className="opacity-25"
+          />
+          <circle
+            cx="7"
+            cy="12"
+            r="1.5"
+            fill="currentColor"
+            className="opacity-80"
+          />
+          
+          {/* Right weight with 3D layering */}
           <rect
             x="13"
             y="8"
             width="8"
             height="8"
-            rx="1"
+            rx="2"
             fill="currentColor"
+            className="opacity-95"
+          />
+          <rect
+            x="13.5"
+            y="8.5"
+            width="7"
+            height="3"
+            rx="1.5"
+            fill="white"
+            className="opacity-25"
+          />
+          <circle
+            cx="17"
+            cy="12"
+            r="1.5"
+            fill="currentColor"
+            className="opacity-80"
           />
         </svg>
       </div>
