@@ -32,16 +32,17 @@ export default function MobileNav({ open, onClose }: MobileNavProps) {
               const isActive = location === item.href;
 
               return (
-                <Link key={item.name} href={item.href}>
-                  <div className={`flex items-center px-4 py-3 text-sm rounded-lg transition-colors cursor-pointer ${
-                    isActive 
-                      ? 'bg-gray-900 text-white' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`} onClick={onClose}>
-                    <Icon className="mr-3 h-5 w-5" />
-                    {item.name}
-                  </div>
-                </Link>
+                <div key={item.name} className={`flex items-center px-4 py-3 text-sm rounded-lg transition-colors cursor-pointer ${
+                  isActive 
+                    ? 'bg-gray-900 text-white' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`} onClick={() => {
+                  window.location.href = item.href;
+                  onClose();
+                }}>
+                  <Icon className="mr-3 h-5 w-5" />
+                  {item.name}
+                </div>
               );
             })}
           </div>

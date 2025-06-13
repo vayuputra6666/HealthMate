@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,7 +37,7 @@ type WorkoutFormData = {
 export default function NewWorkoutModal({ open, onClose }: NewWorkoutModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const [exercises, setExercises] = useState<WorkoutFormData["exercises"]>([
     {
       exerciseId: 0,
@@ -139,8 +139,11 @@ export default function NewWorkoutModal({ open, onClose }: NewWorkoutModalProps)
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>New Workout</DialogTitle>
+          <DialogDescription>
+            Create a new workout routine by selecting exercises and setting your goals.
+          </DialogDescription>
         </DialogHeader>
-        
+
         <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div>
@@ -169,7 +172,7 @@ export default function NewWorkoutModal({ open, onClose }: NewWorkoutModalProps)
                     canRemove={exercises.length > 1}
                   />
                 ))}
-                
+
                 <Button
                   type="button"
                   variant="outline"

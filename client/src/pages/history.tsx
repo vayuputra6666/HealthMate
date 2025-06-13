@@ -16,7 +16,7 @@ interface WorkoutHistory {
   notes?: string;
 }
 
-export default function History() {
+export default function HistoryPage() {
   const { data: workoutHistory, isLoading, error } = useQuery({
     queryKey: ["/api/workout-history"],
     queryFn: () => fetch("/api/workout-history").then((res) => res.json()),
