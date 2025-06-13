@@ -408,7 +408,18 @@ export default function Nutrition() {
           <DialogHeader>
             <DialogTitle>Add Meal</DialogTitle>
           </DialogHeader>
-          <form onSubmit={mealForm.handleSubmit((data) => addMealMutation.mutate(data))} className="space-y-4">
+          <form onSubmit={mealForm.handleSubmit((data) => {
+            const mealData = {
+              name: data.name,
+              calories: data.calories,
+              protein: data.protein,
+              carbs: data.carbs,
+              fat: data.fat,
+              date: new Date(selectedDate),
+              mealType: data.type,
+            };
+            addMealMutation.mutate(mealData);
+          })} className="space-y-4">
             <div>
               <Label htmlFor="meal-name">Meal Name</Label>
               <Input

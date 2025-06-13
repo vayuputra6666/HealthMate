@@ -139,8 +139,8 @@ export default function Exercises() {
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
               {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category ? category.charAt(0).toUpperCase() + category.slice(1) : 'Unknown'}
+                <SelectItem key={category} value={category} className="capitalize">
+                  {category}
                 </SelectItem>
               ))}
             </SelectContent>

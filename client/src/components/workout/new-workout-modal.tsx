@@ -131,11 +131,22 @@ export default function NewWorkoutModal({ open, onOpenChange }: NewWorkoutModalP
       return;
     }
 
+    // Convert exercises to the expected format
+    const formattedExercises = validExercises.map(ex => ({
+      exerciseId: ex.exerciseId,
+      sets: ex.sets.map(set => ({
+        weight: set.weight || "0",
+        reps: set.reps || 0,
+      })),
+    }));
+
     const workoutData: CreateWorkout = {
-      ...data,
+      name: data.name,
       date: new Date(data.date),
-      gender: data.gender,
-      exercises: validExercises,
+      duration: data.duration,
+      notes: data.notes,
+      gender: data.gender || "male",
+      exercises: formattedExercises,
     };
 
     createWorkoutMutation.mutate(workoutData);

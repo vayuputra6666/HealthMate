@@ -527,9 +527,19 @@ export class MemStorage implements IStorage {
   }
 
    // Nutrition methods
-   async createMeal(meal: InsertMeal): Promise<Meal> {
+   async createMeal(mealData: any): Promise<Meal> {
     const id = this.currentMealId++;
-    const newMeal: Meal = { ...meal, id };
+    const newMeal: Meal = { 
+      id,
+      name: mealData.name,
+      type: mealData.mealType || mealData.type,
+      date: new Date(mealData.date),
+      calories: mealData.calories || 0,
+      protein: mealData.protein?.toString() || "0",
+      carbs: mealData.carbs?.toString() || "0",
+      fat: mealData.fat?.toString() || "0",
+      createdAt: new Date(),
+    };
     this.meals.set(id, newMeal);
     return newMeal;
   }

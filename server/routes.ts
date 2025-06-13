@@ -166,10 +166,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Nutrition routes
   app.post("/api/meals", async (req, res) => {
     try {
-      const mealData = insertMealSchema.parse(req.body);
+      // Transform the request data to match expected schema
+      const transformedData = {
+        name: req.body.name,
+        type: req.body.mealType || req.body.type,
+        date: new Date(req.body.date),
+        calories: req.body.calories || 0,
+        protein: req.body.protein || 0,
+        carbs: req.body.carbs || 0,
+        fat: req.body.fat || 0,
+      };
+      
+      const mealData = insertMealSchema.parse(transformedData);
       const meal = await storage.createMeal(mealData);
       res.status(201).json(meal);
     } catch (error) {
+      console.error('Meal creation error:', error);
       if (error instanceof z.ZodError) {
         res.status(400).json({ message: "Invalid meal data", errors: error.errors });
       } else {
