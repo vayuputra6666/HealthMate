@@ -27,7 +27,11 @@ import {
   type MotivationalQuote,
   type InsertMotivationalQuote,
   type DailyChallenge,
-  type InsertDailyChallenge
+  type InsertDailyChallenge,
+  type WeightEntry,
+  type InsertWeightEntry,
+  type UserProfile,
+  type InsertUserProfile
 } from "@shared/schema";
 import { eq, sql, desc, and } from "drizzle-orm";
 
@@ -699,4 +703,14 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { MongoStorage } from "./mongo-storage";
+
+// Choose storage implementation based on environment
+const useMongoDb = process.env.USE_MONGODB === 'true';
+
+export const storage = useMongoDb ? new MongoStorage() : new MemStorage();
+
+// Initialize MongoDB connection if using MongoDB
+if (useMongoDb && storage instanceof MongoStorage) {
+  storage.connect().catch(console.error);
+}
