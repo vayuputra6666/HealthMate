@@ -9,6 +9,7 @@ import QuickActions from "@/components/dashboard/quick-actions";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { LoadingState } from "@/components/ui/loading";
+import TodaysMuscleActivation from "@/components/body-visualization/todays-muscle-activation";
 export default function Dashboard() {
   const [showNewWorkoutModal, setShowNewWorkoutModal] = useState(false);
     const { data: stats, isLoading: statsLoading, error: statsError } = useQuery({

@@ -48,8 +48,7 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
       retry: (failureCount, error: any) => {
         // Don't retry on 4xx errors (client errors)
         if (error?.status >= 400 && error?.status < 500) {
@@ -58,7 +57,6 @@ export const queryClient = new QueryClient({
         // Retry up to 3 times for other errors
         return failureCount < 3;
       },
-      staleTime: 5 * 60 * 1000, // 5 minutes
       onError: (error: any) => {
         console.error('Query error:', error);
         if (error?.message?.includes('JSON') || error?.message?.includes('DOCTYPE')) {
