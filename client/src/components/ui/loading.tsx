@@ -1,4 +1,3 @@
-
 import React from "react";
 import { cn } from "@/lib/utils";
 
@@ -51,16 +50,15 @@ export function LoadingSpinner({ className, size = "md" }: LoadingSpinnerProps) 
   );
 }
 
-interface LoadingStateProps {
-  message?: string;
+interface LoadingProps {
   className?: string;
+  size?: "sm" | "md" | "lg";
 }
 
-export function LoadingState({ message = "Loading...", className }: LoadingStateProps) {
+export function LoadingState({ className }: { className?: string }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center py-12 space-y-4", className)}>
+    <div className={cn("flex flex-col items-center justify-center min-h-[200px] space-y-4", className)}>
       <LoadingSpinner size="lg" />
-      <p className="text-muted-foreground text-sm">{message}</p>
     </div>
   );
 }

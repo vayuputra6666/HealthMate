@@ -31,7 +31,7 @@ export default function Workouts() {
   });
 
   if (isLoading) {
-    return <LoadingState message="Loading your workouts..." />;
+    return <LoadingState />;
   }
 
   if (!workouts || workouts.length === 0) {
