@@ -34,6 +34,8 @@ export default function Exercises() {
     if (!exercises) return [];
 
     return exercises.filter((exercise: Exercise) => {
+      if (!exercise?.name || !exercise?.category) return false;
+
       const matchesSearch = exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         exercise.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
         exercise.muscleGroups?.some(muscle => muscle.toLowerCase().includes(searchTerm.toLowerCase())) ||
