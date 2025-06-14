@@ -18,6 +18,8 @@ export default defineConfig({
   server: {
     port: 5173,
     host: "0.0.0.0",
-    allowedHosts: "all"
+    allowedHosts: [
+      "5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev"
+    ]
   }
 })
