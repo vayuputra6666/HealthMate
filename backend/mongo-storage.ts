@@ -15,7 +15,7 @@ export class MongoStorage implements IStorage {
 
   constructor() {
     const mongoUrl = process.env.MONGODB_URL || "mongodb+srv://vayuputra:Vayu123@cluster0.wxwtcpc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-    const dbName = process.env.MONGODB_DB_NAME || 'health_mate';
+    const dbName = process.env.MONGODB_DB_NAME || 'primeyouth';
 
     this.client = new MongoClient(mongoUrl, {
       serverApi: {

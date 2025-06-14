@@ -1,6 +1,6 @@
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? window.location.origin 
-  : 'http://localhost:5000';
+  : 'http://localhost:3000';
 
 export class ApiError extends Error {
   constructor(message: string, public status: number) {
