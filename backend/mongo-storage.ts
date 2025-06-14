@@ -92,27 +92,78 @@ export class MongoStorage implements IStorage {
     return { ...goal, _id: result.insertedId };
   }
 
-  // Additional methods required by routes
+  // Helper methods for mapping MongoDB data
+  private mapCategory(muscleGroup: any): string {
+    if (!muscleGroup) return "general";
+    
+    if (Array.isArray(muscleGroup)) {
+      muscleGroup = muscleGroup[0];
+    }
+    
+    const muscle = muscleGroup.toLowerCase();
+    
+    // Map common muscle groups to categories
+    if (muscle.includes('chest') || muscle.includes('pecs')) return 'chest';
+    if (muscle.includes('back') || muscle.includes('lats') || muscle.includes('rhomboids')) return 'back';
+    if (muscle.includes('shoulder') || muscle.includes('deltoid')) return 'shoulders';
+    if (muscle.includes('bicep') || muscle.includes('tricep') || muscle.includes('forearm')) return 'arms';
+    if (muscle.includes('quad') || muscle.includes('hamstring') || muscle.includes('glute') || muscle.includes('calf')) return 'legs';
+    if (muscle.includes('abs') || muscle.includes('core') || muscle.includes('oblique')) return 'core';
+    if (muscle.includes('cardio') || muscle.includes('aerobic')) return 'cardio';
+    
+    return 'general';
+  }
+
+  private mapDifficulty(difficultyLevel: any): string {
+    if (!difficultyLevel) return "beginner";
+    
+    const difficulty = difficultyLevel.toString().toLowerCase();
+    
+    if (difficulty.includes('advanced') || difficulty.includes('expert') || difficulty.includes('hard')) return 'advanced';
+    if (difficulty.includes('intermediate') || difficulty.includes('medium')) return 'intermediate';
+    
+    return 'beginner';
+  }
+
+// Additional methods required by routes
   async getAllExercises(): Promise<any[]> {
     try {
+      console.log("Connecting to MongoDB exercises collection...");
+      
+      if (!this.exercises) {
+        console.error("Exercises collection not initialized");
+        return [];
+      }
+      
       const mongoExercises = await this.exercises.find({}).toArray();
-      console.log("Raw MongoDB exercises:", mongoExercises);
+      console.log("Raw MongoDB exercises count:", mongoExercises?.length || 0);
+      console.log("Sample exercise:", mongoExercises[0]);
+      
+      if (!mongoExercises || mongoExercises.length === 0) {
+        console.log("No exercises found in MongoDB");
+        return [];
+      }
       
       // Map MongoDB fields to expected frontend format
-      const mappedExercises = mongoExercises.map(exercise => ({
-        id: exercise._id.toString(),
-        name: exercise.exercise_name,
-        category: this.mapCategory(exercise.muscle_group),
-        instructions: exercise.primary_function || "No instructions available",
-        difficulty: this.mapDifficulty(exercise.difficulty_level),
-        equipment: exercise.equipment || [],
-        muscleGroups: exercise.muscle_group || []
-      }));
+      const mappedExercises = mongoExercises.map(exercise => {
+        const mapped = {
+          id: exercise._id?.toString() || Math.random().toString(),
+          name: exercise.exercise_name || exercise.name || "Unknown Exercise",
+          category: this.mapCategory(exercise.muscle_group) || "general",
+          instructions: exercise.primary_function || exercise.instructions || "No instructions available",
+          difficulty: this.mapDifficulty(exercise.difficulty_level) || "beginner",
+          equipment: Array.isArray(exercise.equipment) ? exercise.equipment : (exercise.equipment ? [exercise.equipment] : []),
+          muscleGroups: Array.isArray(exercise.muscle_group) ? exercise.muscle_group : (exercise.muscle_group ? [exercise.muscle_group] : [])
+        };
+        return mapped;
+      });
       
-      console.log("Mapped exercises:", mappedExercises);
+      console.log("Mapped exercises count:", mappedExercises.length);
+      console.log("Sample mapped exercise:", mappedExercises[0]);
       return mappedExercises;
     } catch (error) {
       console.error("Error fetching exercises from MongoDB:", error);
+      console.error("Error details:", error);
       return [];
     }
   }

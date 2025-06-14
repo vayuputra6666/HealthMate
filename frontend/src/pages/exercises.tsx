@@ -29,25 +29,28 @@ export default function Exercises() {
     queryKey: ['exercises'],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/exercises');
-        const text = await response.text();
-        console.log('Exercises response:', text);
-
+        console.log('Fetching exercises from API...');
+        const response = await fetch('/api/exercises', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
         if (!response.ok) {
+          const errorText = await response.text();
+          console.error('API Error:', errorText);
           throw new Error(`Failed to fetch exercises: ${response.status} ${response.statusText}`);
         }
 
-        // Try to parse as JSON
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (parseError) {
-          console.error('Failed to parse response as JSON:', text);
-          throw new Error('Server returned invalid JSON');
-        }
-
-        console.log('Exercises data:', data);
-        return data;
+        const data = await response.json();
+        console.log('Exercises API response:', data);
+        console.log('Number of exercises:', data?.length || 0);
+        
+        return data || [];
       } catch (error) {
         console.error('Exercise fetch error:', error);
         throw error;

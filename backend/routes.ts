@@ -15,6 +15,19 @@ import {
 export async function registerRoutes(app: Express) {
   const storage = await getStorage();
 
+  // Test endpoint
+  app.get("/api/test", async (req, res) => {
+    try {
+      res.json({ 
+        message: "Backend is working!", 
+        timestamp: new Date().toISOString(),
+        storage: storage ? "Connected" : "Not connected"
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Test failed", error: String(error) });
+    }
+  });
+
   // Exercise routes
   app.post("/api/exercises", async (req, res) => {
     try {
@@ -32,10 +45,21 @@ export async function registerRoutes(app: Express) {
 
   app.get("/api/exercises", async (req, res) => {
     try {
+      console.log("Fetching exercises from storage...");
       const exercises = await storage.getAllExercises();
-      res.json(exercises);
+      console.log("Retrieved exercises:", exercises?.length || 0, "exercises");
+      
+      // Ensure we return an array even if no exercises
+      const result = exercises || [];
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.json(result);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch exercises" });
+      console.error("Error in /api/exercises:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch exercises",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
