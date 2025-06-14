@@ -14,6 +14,7 @@ import {
 
 export async function registerRoutes(app: Express) {
   const storage = await getStorage();
+  await storage.connect();
 
   // Test endpoint
   app.get("/api/test", async (req, res) => {
