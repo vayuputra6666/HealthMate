@@ -1,4 +1,3 @@
-
 import mongoose from 'mongoose';
 import { IStorage } from "./storage.js";
 import { 
@@ -12,10 +11,10 @@ export class MongoStorage implements IStorage {
   constructor() {
     const mongoUrl = process.env.MONGODB_URL || "mongodb+srv://vayuputra:Vayu123@cluster0.wxwtcpc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
     const dbName = process.env.MONGODB_DB_NAME || 'primeyouth';
-    
+
     // Set the database name in the connection string
     const connectionString = mongoUrl.includes(dbName) ? mongoUrl : `${mongoUrl.replace('/?', `/${dbName}?`)}`;
-    
+
     // Connect to MongoDB
     this.initializeConnection(connectionString);
   }
@@ -54,14 +53,14 @@ export class MongoStorage implements IStorage {
   // Helper methods for mapping MongoDB data
   private mapCategory(muscleGroup: any): string {
     if (!muscleGroup) return "general";
-    
+
     let primaryMuscle = "";
     if (Array.isArray(muscleGroup)) {
       primaryMuscle = muscleGroup[0]?.toLowerCase() || "";
     } else {
       primaryMuscle = muscleGroup.toString().toLowerCase();
     }
-    
+
     // Map common muscle groups to categories based on your MongoDB data
     if (primaryMuscle.includes('chest') || primaryMuscle.includes('pectoral')) return 'chest';
     if (primaryMuscle.includes('back') || primaryMuscle.includes('lats') || primaryMuscle.includes('rhomboids') || primaryMuscle.includes('trap')) return 'back';
@@ -70,35 +69,35 @@ export class MongoStorage implements IStorage {
     if (primaryMuscle.includes('quad') || primaryMuscle.includes('hamstring') || primaryMuscle.includes('glute') || primaryMuscle.includes('calf')) return 'legs';
     if (primaryMuscle.includes('abs') || primaryMuscle.includes('core') || primaryMuscle.includes('oblique')) return 'core';
     if (primaryMuscle.includes('cardio') || primaryMuscle.includes('aerobic')) return 'cardio';
-    
+
     return 'general';
   }
 
   private mapDifficulty(difficultyLevel: any): string {
     if (!difficultyLevel) return "beginner";
-    
+
     const difficulty = difficultyLevel.toString().toLowerCase();
-    
+
     if (difficulty.includes('advanced') || difficulty.includes('expert') || difficulty.includes('hard')) return 'advanced';
     if (difficulty.includes('intermediate') || difficulty.includes('medium')) return 'intermediate';
-    
+
     return 'beginner';
   }
 
   async getAllExercises(): Promise<any[]> {
     try {
       console.log("Fetching exercises from MongoDB via Mongoose...");
-      
+
       await this.connect();
-      
+
       const mongoExercises = await Exercise.find({}).lean();
       console.log("Raw MongoDB exercises count:", mongoExercises?.length || 0);
-      
+
       if (!mongoExercises || mongoExercises.length === 0) {
         console.log("No exercises found in MongoDB");
         return [];
       }
-      
+
       // Map MongoDB fields to expected frontend format
       const mappedExercises = mongoExercises.map(exercise => {
         const mapped = {
@@ -113,7 +112,7 @@ export class MongoStorage implements IStorage {
         console.log(`Mapped exercise: ${mapped.name} -> category: ${mapped.category}, difficulty: ${mapped.difficulty}`);
         return mapped;
       });
-      
+
       console.log("Mapped exercises count:", mappedExercises.length);
       return mappedExercises;
     } catch (error) {
@@ -135,11 +134,11 @@ export class MongoStorage implements IStorage {
 
   async getExerciseById(id: number): Promise<any> {
     await this.connect();
-    
+
     try {
       // Try to find by _id if it's a valid ObjectId
       const exercise = await Exercise.findById(id.toString()).lean();
-      
+
       if (exercise) {
         return {
           id: exercise._id.toString(),
@@ -151,7 +150,7 @@ export class MongoStorage implements IStorage {
           muscleGroups: exercise.muscle_group || []
         };
       }
-      
+
       return null;
     } catch (error) {
       console.error("Error finding exercise by ID:", error);
@@ -184,7 +183,7 @@ export class MongoStorage implements IStorage {
     await this.connect();
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
-    
+
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 

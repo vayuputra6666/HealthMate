@@ -48,9 +48,7 @@ export async function registerRoutes(app: Express) {
       console.log("API: Fetching exercises from storage...");
       
       // Ensure storage is connected
-      if (typeof storage.connect === 'function') {
-        await storage.connect();
-      }
+      await storage.connect();
       
       const exercises = await storage.getAllExercises();
       console.log("API: Retrieved exercises:", exercises?.length || 0, "exercises");
@@ -60,7 +58,6 @@ export async function registerRoutes(app: Express) {
       
       // Set proper headers
       res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Access-Control-Allow-Origin', '*');
       res.status(200).json(result);
     } catch (error) {
       console.error("API Error in /api/exercises:", error);

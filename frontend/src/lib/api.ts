@@ -42,6 +42,9 @@ export async function apiRequest<T>(endpoint: string, options: RequestInit = {})
 
     // Network or other errors
     console.error('API request failed:', error);
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      throw new ApiError('Unable to connect to server. Please check if the backend is running.', 0);
+    }
     throw new ApiError('Network error or server unavailable', 0);
   }
 }
