@@ -45,20 +45,25 @@ export async function registerRoutes(app: Express) {
 
   app.get("/api/exercises", async (req, res) => {
     try {
-      console.log("API: Fetching exercises from storage...");
+      console.log("API: GET /api/exercises - Request received");
+      console.log("API: Request headers:", req.headers);
       
       // Ensure storage is connected
       await storage.connect();
       
       const exercises = await storage.getAllExercises();
       console.log("API: Retrieved exercises:", exercises?.length || 0, "exercises");
+      console.log("API: First exercise:", exercises?.[0]);
       
       // Ensure we return an array even if no exercises
       const result = exercises || [];
       
       // Set proper headers
       res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Access-Control-Allow-Origin', '*');
       res.status(200).json(result);
+      
+      console.log("API: Response sent successfully");
     } catch (error) {
       console.error("API Error in /api/exercises:", error);
       console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
