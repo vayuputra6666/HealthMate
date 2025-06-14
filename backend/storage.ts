@@ -1,38 +1,26 @@
-
 import { MongoStorage } from "./mongo-storage.js";
 
 export interface IStorage {
-  // Exercise methods
   getExercises(): Promise<any[]>;
+  createExercise(exercise: any): Promise<any>;
+  getWorkouts(): Promise<any[]>;
+  createWorkout(workout: any): Promise<any>;
+  getMealsByDate(date: Date): Promise<any[]>;
+  createMeal(meal: any): Promise<any>;
+  getNutritionGoals(): Promise<any[]>;
+  createNutritionGoal(goal: any): Promise<any>;
+
+  // Additional methods used by routes
   getAllExercises(): Promise<any[]>;
   getExerciseById(id: number): Promise<any>;
-  createExercise(exercise: any): Promise<any>;
-  
-  // Workout methods
-  getWorkouts(): Promise<any[]>;
   getAllWorkouts(): Promise<any[]>;
   getRecentWorkouts(): Promise<any[]>;
-  createWorkout(workout: any): Promise<any>;
-  
-  // Meal methods
-  getMealsByDate(date: Date): Promise<any[]>;
   getAllMeals(): Promise<any[]>;
-  createMeal(meal: any): Promise<any>;
-  
-  // Recipe methods
   createRecipe(recipe: any): Promise<any>;
   getAllRecipes(): Promise<any[]>;
-  
-  // Nutrition goal methods
-  getNutritionGoals(): Promise<any[]>;
   getAllNutritionGoals(): Promise<any[]>;
-  createNutritionGoal(goal: any): Promise<any>;
-  
-  // Challenge methods
   createChallenge(challenge: any): Promise<any>;
   getAllChallenges(): Promise<any[]>;
-  
-  // Weight tracking methods
   createWeightEntry(weightEntry: any): Promise<any>;
   getWeightEntries(): Promise<any[]>;
   getLatestWeight(): Promise<any>;
@@ -158,6 +146,69 @@ class InMemoryStorage implements IStorage {
   async getLatestWeight(): Promise<any> {
     if (this.weightEntries.length === 0) return null;
     return this.weightEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+  }
+
+  // Additional methods required by routes
+  async getAllExercises(): Promise<any[]> {
+    return this.exercises;
+  }
+
+  async getExerciseById(id: number): Promise<any> {
+    return this.exercises.find(exercise => exercise.id === id.toString()) || null;
+  }
+
+  async getAllWorkouts(): Promise<any[]> {
+    return this.workouts;
+  }
+
+  async getRecentWorkouts(): Promise<any[]> {
+    return this.workouts.slice(-5);
+  }
+
+  async getAllMeals(): Promise<any[]> {
+    return this.meals;
+  }
+
+  async createRecipe(recipe: any): Promise<any> {
+    const newRecipe = { ...recipe, id: Date.now().toString() };
+    this.recipes = this.recipes || [];
+    this.recipes.push(newRecipe);
+    return newRecipe;
+  }
+
+  async getAllRecipes(): Promise<any[]> {
+    return this.recipes || [];
+  }
+
+  async getAllNutritionGoals(): Promise<any[]> {
+    return this.nutritionGoals;
+  }
+
+  async createChallenge(challenge: any): Promise<any> {
+    const newChallenge = { ...challenge, id: Date.now().toString() };
+    this.challenges = this.challenges || [];
+    this.challenges.push(newChallenge);
+    return newChallenge;
+  }
+
+  async getAllChallenges(): Promise<any[]> {
+    return this.challenges || [];
+  }
+
+  async createWeightEntry(weightEntry: any): Promise<any> {
+    const newEntry = { ...weightEntry, id: Date.now().toString() };
+    this.weightEntries = this.weightEntries || [];
+    this.weightEntries.push(newEntry);
+    return newEntry;
+  }
+
+  async getWeightEntries(): Promise<any[]> {
+    return this.weightEntries || [];
+  }
+
+  async getLatestWeight(): Promise<any> {
+    const entries = this.weightEntries || [];
+    return entries.length > 0 ? entries[entries.length - 1] : null;
   }
 }
 

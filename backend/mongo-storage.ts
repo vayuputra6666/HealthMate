@@ -94,18 +94,27 @@ export class MongoStorage implements IStorage {
 
   // Additional methods required by routes
   async getAllExercises(): Promise<any[]> {
-    const mongoExercises = await this.exercises.find({}).toArray();
-    
-    // Map MongoDB fields to expected frontend format
-    return mongoExercises.map(exercise => ({
-      id: exercise._id.toString(),
-      name: exercise.exercise_name,
-      category: this.mapCategory(exercise.muscle_group),
-      instructions: exercise.primary_function || "No instructions available",
-      difficulty: this.mapDifficulty(exercise.difficulty_level),
-      equipment: exercise.equipment || [],
-      muscleGroups: exercise.muscle_group || []
-    }));
+    try {
+      const mongoExercises = await this.exercises.find({}).toArray();
+      console.log("Raw MongoDB exercises:", mongoExercises);
+      
+      // Map MongoDB fields to expected frontend format
+      const mappedExercises = mongoExercises.map(exercise => ({
+        id: exercise._id.toString(),
+        name: exercise.exercise_name,
+        category: this.mapCategory(exercise.muscle_group),
+        instructions: exercise.primary_function || "No instructions available",
+        difficulty: this.mapDifficulty(exercise.difficulty_level),
+        equipment: exercise.equipment || [],
+        muscleGroups: exercise.muscle_group || []
+      }));
+      
+      console.log("Mapped exercises:", mappedExercises);
+      return mappedExercises;
+    } catch (error) {
+      console.error("Error fetching exercises from MongoDB:", error);
+      return [];
+    }
   }
 
   private mapCategory(muscleGroups: string[]): string {
@@ -208,5 +217,30 @@ export class MongoStorage implements IStorage {
 
   async getLatestWeight(): Promise<any> {
     return await this.weightEntries.findOne({}, { sort: { date: -1 } });
+  }
+
+  // Missing methods required by storage interface
+  async getAllMeals(): Promise<any[]> {
+    return await this.meals.find({}).toArray();
+  }
+
+  async getAllRecipes(): Promise<any[]> {
+    return await this.recipes.find({}).toArray();
+  }
+
+  async getAllNutritionGoals(): Promise<any[]> {
+    return await this.nutritionGoals.find({}).toArray();
+  }
+
+  async getAllWorkouts(): Promise<any[]> {
+    return await this.workouts.find({}).toArray();
+  }
+
+  async getRecentWorkouts(): Promise<any[]> {
+    return await this.workouts.find({}).sort({ date: -1 }).limit(5).toArray();
+  }
+
+  async getAllChallenges(): Promise<any[]> {
+    return await this.challenges.find({}).toArray();
   }
 }
