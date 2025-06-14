@@ -1,0 +1,66 @@
+[vite] connecting...
+[vite] connected.
+Fetching exercises from API...
+API request failed: 
+TypeError {}
+
+Exercise fetch error: 
+ApiError {status: 0, name: "ApiError"}
+
+Failed to fetch
+Fetching exercises from API...
+API request failed: 
+TypeError {}
+
+Exercise fetch error: 
+ApiError {status: 0, name: "ApiError"}
+
+Failed to fetch
+Fetching exercises from API...
+API request failed: 
+TypeError {}
+
+Exercise fetch error: 
+ApiError {status: 0, name: "ApiError"}
+
+Failed to fetch
+Fetching exercises from API...
+API request failed: 
+TypeError {}
+message: "Failed to fetch"
+stack: "TypeError: Failed to fetch↵ at window.fetch (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:218642)↵ at apiRequest (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/src/lib/api.ts:12:28)↵ at Object.get (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/src/lib/api.ts:41:22)↵ at queryFn (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/src/pages/exercises.tsx:40:32)↵ at Object.fetchFn [as fn] (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=60951223:840:14)↵ at run (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=60951223:494:49)↵ at https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=60951223:519:11"
+get stack: ƒ ()
+set stack: ƒ ()
+length: 1
+name: ""
+[[Prototype]]: ƒ ()
+[[Prototype]]: Object
+
+Exercise fetch error: 
+ApiError {status: 0, name: "ApiError"}
+name: "ApiError"
+status: 0
+message: "Unable to connect to server. Please check if the backend is running."
+stack: "ApiError: Unable to connect to server. Please check if the backend is running.↵ at apiRequest (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/src/lib/api.ts:35:13)↵ at async queryFn (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/src/pages/exercises.tsx:40:22)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+Exercise loading error: 
+ApiError {status: 0, name: "ApiError"}
+name: "ApiError"
+status: 0
+message: "Unable to connect to server. Please check if the backend is running."
+stack: "ApiError: Unable to connect to server. Please check if the backend is running.↵ at apiRequest (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/src/lib/api.ts:35:13)↵ at async queryFn (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/src/pages/exercises.tsx:40:22)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+Failed to fetch
+at window.fetch (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:218642)
+at apiRequest (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/src/lib/api.ts:12:28)
+at Object.get (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/src/lib/api.ts:41:22)
+at queryFn (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/src/pages/exercises.tsx:40:32)
+at Object.fetchFn [as fn] (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=60951223:840:14)
+at run (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=60951223:494:49)
+at https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=60951223:519:11
