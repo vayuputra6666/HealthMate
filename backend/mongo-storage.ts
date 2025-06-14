@@ -94,11 +94,73 @@ export class MongoStorage implements IStorage {
 
   // Additional methods required by routes
   async getAllExercises(): Promise<any[]> {
-    return await this.exercises.find({}).toArray();
+    const mongoExercises = await this.exercises.find({}).toArray();
+    
+    // Map MongoDB fields to expected frontend format
+    return mongoExercises.map(exercise => ({
+      id: exercise._id.toString(),
+      name: exercise.exercise_name,
+      category: this.mapCategory(exercise.muscle_group),
+      instructions: exercise.primary_function || "No instructions available",
+      difficulty: this.mapDifficulty(exercise.difficulty_level),
+      equipment: exercise.equipment || [],
+      muscleGroups: exercise.muscle_group || []
+    }));
+  }
+
+  private mapCategory(muscleGroups: string[]): string {
+    if (!muscleGroups || muscleGroups.length === 0) return "general";
+    
+    const primaryMuscle = muscleGroups[0].toLowerCase();
+    
+    if (primaryMuscle.includes("quadriceps") || primaryMuscle.includes("hamstring") || primaryMuscle.includes("glute")) {
+      return "legs";
+    }
+    if (primaryMuscle.includes("pectoral") || primaryMuscle.includes("chest")) {
+      return "chest";
+    }
+    if (primaryMuscle.includes("back") || primaryMuscle.includes("trap")) {
+      return "back";
+    }
+    if (primaryMuscle.includes("deltoid") || primaryMuscle.includes("shoulder")) {
+      return "shoulders";
+    }
+    if (primaryMuscle.includes("tricep") || primaryMuscle.includes("bicep")) {
+      return "arms";
+    }
+    
+    return "general";
+  }
+
+  private mapDifficulty(difficulty: string): string {
+    if (!difficulty) return "beginner";
+    return difficulty.toLowerCase();
   }
 
   async getExerciseById(id: number): Promise<any> {
-    return await this.exercises.findOne({ id: id });
+    const { ObjectId } = await import('mongodb');
+    
+    try {
+      // Try to find by _id if it's a valid ObjectId
+      const exercise = await this.exercises.findOne({ _id: new ObjectId(id.toString()) });
+      
+      if (exercise) {
+        return {
+          id: exercise._id.toString(),
+          name: exercise.exercise_name,
+          category: this.mapCategory(exercise.muscle_group),
+          instructions: exercise.primary_function || "No instructions available",
+          difficulty: this.mapDifficulty(exercise.difficulty_level),
+          equipment: exercise.equipment || [],
+          muscleGroups: exercise.muscle_group || []
+        };
+      }
+      
+      return null;
+    } catch (error) {
+      // If ObjectId conversion fails, try finding by numeric id
+      return await this.exercises.findOne({ id: id });
+    }
   }
 
   async getAllWorkouts(): Promise<any[]> {
