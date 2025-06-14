@@ -20,6 +20,13 @@ export default defineConfig({
     host: "0.0.0.0",
     allowedHosts: [
       "51d76f11-192a-4da6-af5b-92acab03c729-00-38kybzaz22f7l.spock.replit.dev"
-    ]
+    ],
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   }
 })

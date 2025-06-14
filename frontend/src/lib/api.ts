@@ -1,6 +1,4 @@
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? window.location.origin 
-  : `${window.location.protocol}//${window.location.hostname}:3000`;
+const API_BASE_URL = window.location.origin;
 
 export class ApiError extends Error {
   constructor(message: string, public status: number) {
