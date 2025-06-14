@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Filter, Dumbbell, Target, Clock, Plus } from "lucide-react";
 import { LoadingState, EmptyState } from "@/components/ui/loading";
 import NewExerciseModal from "@/components/exercise/new-exercise-modal";
+import { api } from "@/lib/api";
 
 interface Exercise {
   id: number;
@@ -30,23 +31,7 @@ export default function Exercises() {
     queryFn: async () => {
       try {
         console.log('Fetching exercises from API...');
-        const response = await fetch('/api/exercises', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('API Error:', errorText);
-          throw new Error(`Failed to fetch exercises: ${response.status} ${response.statusText}`);
-        }
-
-        const data = await response.json();
+        const data = await api.get('/api/exercises');
         console.log('Exercises API response:', data);
         console.log('Number of exercises:', data?.length || 0);
         

@@ -16,7 +16,19 @@ export class MongoStorage implements IStorage {
     // Set the database name in the connection string
     const connectionString = mongoUrl.includes(dbName) ? mongoUrl : `${mongoUrl.replace('/?', `/${dbName}?`)}`;
     
-    mongoose.connect(connectionString);
+    // Connect to MongoDB
+    this.initializeConnection(connectionString);
+  }
+
+  private async initializeConnection(connectionString: string) {
+    try {
+      await mongoose.connect(connectionString);
+      console.log("MongoDB connected successfully via Mongoose");
+      this.connected = true;
+    } catch (error) {
+      console.error("Failed to connect to MongoDB:", error);
+      this.connected = false;
+    }
   }
 
   async connect(): Promise<void> {
