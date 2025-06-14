@@ -3,11 +3,13 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import express, { type Express } from "express";
-import { createServer as createViteServer, type ViteDevServer } from "vite";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function setupVite(app: Express, server: any) {
+  // Dynamic import to avoid bundling Vite in production
+  const { createServer: createViteServer } = await import("vite");
+  
   const vite = await createViteServer({
     server: { middlewareMode: true },
     appType: "spa",
