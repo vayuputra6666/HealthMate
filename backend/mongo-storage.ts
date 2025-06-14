@@ -1,53 +1,40 @@
 
-import { MongoClient, Db, Collection, ServerApiVersion } from 'mongodb';
+import mongoose from 'mongoose';
 import { IStorage } from "./storage.js";
+import { 
+  Exercise, Workout, Meal, Recipe, NutritionGoal, WeightEntry, Challenge,
+  IExercise, IWorkout, IMeal, IRecipe, INutritionGoal, IWeightEntry, IChallenge 
+} from './models.js';
 
 export class MongoStorage implements IStorage {
-  private client: MongoClient;
-  private db: Db;
-  private exercises: Collection;
-  private workouts: Collection;
-  private meals: Collection;
-  private nutritionGoals: Collection;
-  private recipes: Collection;
-  private weightEntries: Collection;
-  private challenges: Collection;
   private connected: boolean = false;
 
   constructor() {
     const mongoUrl = process.env.MONGODB_URL || "mongodb+srv://vayuputra:Vayu123@cluster0.wxwtcpc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
     const dbName = process.env.MONGODB_DB_NAME || 'primeyouth';
-
-    this.client = new MongoClient(mongoUrl, {
-      serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-      }
-    });
-    this.db = this.client.db(dbName);
-    this.exercises = this.db.collection("exercises");
-    this.workouts = this.db.collection("workouts");
-    this.meals = this.db.collection("meals");
-    this.nutritionGoals = this.db.collection("nutrition_goals");
-    this.recipes = this.db.collection("recipes");
-    this.weightEntries = this.db.collection("weight_entries");
-    this.challenges = this.db.collection("challenges");
+    
+    // Set the database name in the connection string
+    const connectionString = mongoUrl.includes(dbName) ? mongoUrl : `${mongoUrl.replace('/?', `/${dbName}?`)}`;
+    
+    mongoose.connect(connectionString);
   }
 
   async connect(): Promise<void> {
     if (!this.connected) {
-      await this.client.connect();
-      console.log("Connected to MongoDB");
-      await this.db.admin().ping();
-      console.log("MongoDB ping successful");
-      this.connected = true;
+      try {
+        await mongoose.connection.asPromise();
+        console.log("Connected to MongoDB via Mongoose");
+        this.connected = true;
+      } catch (error) {
+        console.error("Failed to connect to MongoDB:", error);
+        throw error;
+      }
     }
   }
 
   async disconnect(): Promise<void> {
     if (this.connected) {
-      await this.client.close();
+      await mongoose.disconnect();
       this.connected = false;
     }
   }
@@ -88,17 +75,11 @@ export class MongoStorage implements IStorage {
 
   async getAllExercises(): Promise<any[]> {
     try {
-      console.log("Fetching exercises from MongoDB...");
+      console.log("Fetching exercises from MongoDB via Mongoose...");
       
-      // Ensure connection
       await this.connect();
       
-      if (!this.exercises) {
-        console.error("Exercises collection not initialized");
-        return [];
-      }
-      
-      const mongoExercises = await this.exercises.find({}).toArray();
+      const mongoExercises = await Exercise.find({}).lean();
       console.log("Raw MongoDB exercises count:", mongoExercises?.length || 0);
       
       if (!mongoExercises || mongoExercises.length === 0) {
@@ -135,17 +116,17 @@ export class MongoStorage implements IStorage {
 
   async createExercise(exercise: any): Promise<any> {
     await this.connect();
-    const result = await this.exercises.insertOne(exercise);
-    return { ...exercise, _id: result.insertedId };
+    const newExercise = new Exercise(exercise);
+    const result = await newExercise.save();
+    return result.toObject();
   }
 
   async getExerciseById(id: number): Promise<any> {
     await this.connect();
-    const { ObjectId } = await import('mongodb');
     
     try {
       // Try to find by _id if it's a valid ObjectId
-      const exercise = await this.exercises.findOne({ _id: new ObjectId(id.toString()) });
+      const exercise = await Exercise.findById(id.toString()).lean();
       
       if (exercise) {
         return {
@@ -161,14 +142,14 @@ export class MongoStorage implements IStorage {
       
       return null;
     } catch (error) {
-      // If ObjectId conversion fails, try finding by numeric id
-      return await this.exercises.findOne({ id: id });
+      console.error("Error finding exercise by ID:", error);
+      return null;
     }
   }
 
   async getWorkouts(): Promise<any[]> {
     await this.connect();
-    return await this.workouts.find({}).toArray();
+    return await Workout.find({}).lean();
   }
 
   async getAllWorkouts(): Promise<any[]> {
@@ -177,13 +158,14 @@ export class MongoStorage implements IStorage {
 
   async createWorkout(workout: any): Promise<any> {
     await this.connect();
-    const result = await this.workouts.insertOne(workout);
-    return { ...workout, _id: result.insertedId };
+    const newWorkout = new Workout(workout);
+    const result = await newWorkout.save();
+    return result.toObject();
   }
 
   async getRecentWorkouts(): Promise<any[]> {
     await this.connect();
-    return await this.workouts.find({}).sort({ date: -1 }).limit(5).toArray();
+    return await Workout.find({}).sort({ date: -1 }).limit(5).lean();
   }
 
   async getMealsByDate(date: Date): Promise<any[]> {
@@ -194,28 +176,29 @@ export class MongoStorage implements IStorage {
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    return await this.meals.find({
+    return await Meal.find({
       date: {
         $gte: startOfDay,
         $lte: endOfDay
       }
-    }).toArray();
+    }).lean();
   }
 
   async getAllMeals(): Promise<any[]> {
     await this.connect();
-    return await this.meals.find({}).toArray();
+    return await Meal.find({}).lean();
   }
 
   async createMeal(meal: any): Promise<any> {
     await this.connect();
-    const result = await this.meals.insertOne(meal);
-    return { ...meal, _id: result.insertedId };
+    const newMeal = new Meal(meal);
+    const result = await newMeal.save();
+    return result.toObject();
   }
 
   async getNutritionGoals(): Promise<any[]> {
     await this.connect();
-    return await this.nutritionGoals.find({}).toArray();
+    return await NutritionGoal.find({}).lean();
   }
 
   async getAllNutritionGoals(): Promise<any[]> {
@@ -224,45 +207,49 @@ export class MongoStorage implements IStorage {
 
   async createNutritionGoal(goal: any): Promise<any> {
     await this.connect();
-    const result = await this.nutritionGoals.insertOne(goal);
-    return { ...goal, _id: result.insertedId };
+    const newGoal = new NutritionGoal(goal);
+    const result = await newGoal.save();
+    return result.toObject();
   }
 
   async createRecipe(recipe: any): Promise<any> {
     await this.connect();
-    const result = await this.recipes.insertOne(recipe);
-    return { ...recipe, _id: result.insertedId };
+    const newRecipe = new Recipe(recipe);
+    const result = await newRecipe.save();
+    return result.toObject();
   }
 
   async getAllRecipes(): Promise<any[]> {
     await this.connect();
-    return await this.recipes.find({}).toArray();
+    return await Recipe.find({}).lean();
   }
 
   async createChallenge(challenge: any): Promise<any> {
     await this.connect();
-    const result = await this.challenges.insertOne(challenge);
-    return { ...challenge, _id: result.insertedId };
+    const newChallenge = new Challenge(challenge);
+    const result = await newChallenge.save();
+    return result.toObject();
   }
 
   async getAllChallenges(): Promise<any[]> {
     await this.connect();
-    return await this.challenges.find({}).toArray();
+    return await Challenge.find({}).lean();
   }
 
   async createWeightEntry(weightEntry: any): Promise<any> {
     await this.connect();
-    const result = await this.weightEntries.insertOne(weightEntry);
-    return { ...weightEntry, _id: result.insertedId };
+    const newWeightEntry = new WeightEntry(weightEntry);
+    const result = await newWeightEntry.save();
+    return result.toObject();
   }
 
   async getWeightEntries(): Promise<any[]> {
     await this.connect();
-    return await this.weightEntries.find({}).sort({ date: -1 }).toArray();
+    return await WeightEntry.find({}).sort({ date: -1 }).lean();
   }
 
   async getLatestWeight(): Promise<any> {
     await this.connect();
-    return await this.weightEntries.findOne({}, { sort: { date: -1 } });
+    return await WeightEntry.findOne({}).sort({ date: -1 }).lean();
   }
 }
