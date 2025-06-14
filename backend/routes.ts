@@ -46,6 +46,12 @@ export async function registerRoutes(app: Express) {
   app.get("/api/exercises", async (req, res) => {
     try {
       console.log("Fetching exercises from storage...");
+      
+      // Ensure storage is connected
+      if (typeof storage.connect === 'function') {
+        await storage.connect();
+      }
+      
       const exercises = await storage.getAllExercises();
       console.log("Retrieved exercises:", exercises?.length || 0, "exercises");
       
@@ -56,6 +62,7 @@ export async function registerRoutes(app: Express) {
       res.json(result);
     } catch (error) {
       console.error("Error in /api/exercises:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
       res.status(500).json({ 
         message: "Failed to fetch exercises",
         error: error instanceof Error ? error.message : "Unknown error"

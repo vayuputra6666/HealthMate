@@ -12,6 +12,7 @@ export class MongoStorage implements IStorage {
   private recipes: Collection;
   private weightEntries: Collection;
   private challenges: Collection;
+  private connected: boolean = false;
 
   constructor() {
     const mongoUrl = process.env.MONGODB_URL || "mongodb+srv://vayuputra:Vayu123@cluster0.wxwtcpc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
@@ -35,81 +36,41 @@ export class MongoStorage implements IStorage {
   }
 
   async connect(): Promise<void> {
-    await this.client.connect();
-    console.log("Connected to MongoDB");
-    await this.db.admin().ping();
-    console.log("MongoDB ping successful");
+    if (!this.connected) {
+      await this.client.connect();
+      console.log("Connected to MongoDB");
+      await this.db.admin().ping();
+      console.log("MongoDB ping successful");
+      this.connected = true;
+    }
   }
 
   async disconnect(): Promise<void> {
-    await this.client.close();
-  }
-
-  async getExercises(): Promise<any[]> {
-    return await this.exercises.find({}).toArray();
-  }
-
-  async createExercise(exercise: any): Promise<any> {
-    const result = await this.exercises.insertOne(exercise);
-    return { ...exercise, _id: result.insertedId };
-  }
-
-  async getWorkouts(): Promise<any[]> {
-    return await this.workouts.find({}).toArray();
-  }
-
-  async createWorkout(workout: any): Promise<any> {
-    const result = await this.workouts.insertOne(workout);
-    return { ...workout, _id: result.insertedId };
-  }
-
-  async getMealsByDate(date: Date): Promise<any[]> {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    return await this.meals.find({
-      date: {
-        $gte: startOfDay,
-        $lte: endOfDay
-      }
-    }).toArray();
-  }
-
-  async createMeal(meal: any): Promise<any> {
-    const result = await this.meals.insertOne(meal);
-    return { ...meal, _id: result.insertedId };
-  }
-
-  async getNutritionGoals(): Promise<any[]> {
-    return await this.nutritionGoals.find({}).toArray();
-  }
-
-  async createNutritionGoal(goal: any): Promise<any> {
-    const result = await this.nutritionGoals.insertOne(goal);
-    return { ...goal, _id: result.insertedId };
+    if (this.connected) {
+      await this.client.close();
+      this.connected = false;
+    }
   }
 
   // Helper methods for mapping MongoDB data
   private mapCategory(muscleGroup: any): string {
     if (!muscleGroup) return "general";
     
+    let primaryMuscle = "";
     if (Array.isArray(muscleGroup)) {
-      muscleGroup = muscleGroup[0];
+      primaryMuscle = muscleGroup[0]?.toLowerCase() || "";
+    } else {
+      primaryMuscle = muscleGroup.toString().toLowerCase();
     }
     
-    const muscle = muscleGroup.toLowerCase();
-    
-    // Map common muscle groups to categories
-    if (muscle.includes('chest') || muscle.includes('pecs')) return 'chest';
-    if (muscle.includes('back') || muscle.includes('lats') || muscle.includes('rhomboids')) return 'back';
-    if (muscle.includes('shoulder') || muscle.includes('deltoid')) return 'shoulders';
-    if (muscle.includes('bicep') || muscle.includes('tricep') || muscle.includes('forearm')) return 'arms';
-    if (muscle.includes('quad') || muscle.includes('hamstring') || muscle.includes('glute') || muscle.includes('calf')) return 'legs';
-    if (muscle.includes('abs') || muscle.includes('core') || muscle.includes('oblique')) return 'core';
-    if (muscle.includes('cardio') || muscle.includes('aerobic')) return 'cardio';
+    // Map common muscle groups to categories based on your MongoDB data
+    if (primaryMuscle.includes('chest') || primaryMuscle.includes('pectoral')) return 'chest';
+    if (primaryMuscle.includes('back') || primaryMuscle.includes('lats') || primaryMuscle.includes('rhomboids') || primaryMuscle.includes('trap')) return 'back';
+    if (primaryMuscle.includes('shoulder') || primaryMuscle.includes('deltoid')) return 'shoulders';
+    if (primaryMuscle.includes('bicep') || primaryMuscle.includes('tricep') || primaryMuscle.includes('forearm')) return 'arms';
+    if (primaryMuscle.includes('quad') || primaryMuscle.includes('hamstring') || primaryMuscle.includes('glute') || primaryMuscle.includes('calf')) return 'legs';
+    if (primaryMuscle.includes('abs') || primaryMuscle.includes('core') || primaryMuscle.includes('oblique')) return 'core';
+    if (primaryMuscle.includes('cardio') || primaryMuscle.includes('aerobic')) return 'cardio';
     
     return 'general';
   }
@@ -125,10 +86,12 @@ export class MongoStorage implements IStorage {
     return 'beginner';
   }
 
-// Additional methods required by routes
   async getAllExercises(): Promise<any[]> {
     try {
-      console.log("Connecting to MongoDB exercises collection...");
+      console.log("Fetching exercises from MongoDB...");
+      
+      // Ensure connection
+      await this.connect();
       
       if (!this.exercises) {
         console.error("Exercises collection not initialized");
@@ -137,7 +100,6 @@ export class MongoStorage implements IStorage {
       
       const mongoExercises = await this.exercises.find({}).toArray();
       console.log("Raw MongoDB exercises count:", mongoExercises?.length || 0);
-      console.log("Sample exercise:", mongoExercises[0]);
       
       if (!mongoExercises || mongoExercises.length === 0) {
         console.log("No exercises found in MongoDB");
@@ -155,49 +117,30 @@ export class MongoStorage implements IStorage {
           equipment: Array.isArray(exercise.equipment) ? exercise.equipment : (exercise.equipment ? [exercise.equipment] : []),
           muscleGroups: Array.isArray(exercise.muscle_group) ? exercise.muscle_group : (exercise.muscle_group ? [exercise.muscle_group] : [])
         };
+        console.log(`Mapped exercise: ${mapped.name} -> category: ${mapped.category}, difficulty: ${mapped.difficulty}`);
         return mapped;
       });
       
       console.log("Mapped exercises count:", mappedExercises.length);
-      console.log("Sample mapped exercise:", mappedExercises[0]);
       return mappedExercises;
     } catch (error) {
       console.error("Error fetching exercises from MongoDB:", error);
-      console.error("Error details:", error);
       return [];
     }
   }
 
-  private mapCategory(muscleGroups: string[]): string {
-    if (!muscleGroups || muscleGroups.length === 0) return "general";
-    
-    const primaryMuscle = muscleGroups[0].toLowerCase();
-    
-    if (primaryMuscle.includes("quadriceps") || primaryMuscle.includes("hamstring") || primaryMuscle.includes("glute")) {
-      return "legs";
-    }
-    if (primaryMuscle.includes("pectoral") || primaryMuscle.includes("chest")) {
-      return "chest";
-    }
-    if (primaryMuscle.includes("back") || primaryMuscle.includes("trap")) {
-      return "back";
-    }
-    if (primaryMuscle.includes("deltoid") || primaryMuscle.includes("shoulder")) {
-      return "shoulders";
-    }
-    if (primaryMuscle.includes("tricep") || primaryMuscle.includes("bicep")) {
-      return "arms";
-    }
-    
-    return "general";
+  async getExercises(): Promise<any[]> {
+    return await this.getAllExercises();
   }
 
-  private mapDifficulty(difficulty: string): string {
-    if (!difficulty) return "beginner";
-    return difficulty.toLowerCase();
+  async createExercise(exercise: any): Promise<any> {
+    await this.connect();
+    const result = await this.exercises.insertOne(exercise);
+    return { ...exercise, _id: result.insertedId };
   }
 
   async getExerciseById(id: number): Promise<any> {
+    await this.connect();
     const { ObjectId } = await import('mongodb');
     
     try {
@@ -207,9 +150,9 @@ export class MongoStorage implements IStorage {
       if (exercise) {
         return {
           id: exercise._id.toString(),
-          name: exercise.exercise_name,
+          name: exercise.exercise_name || exercise.name,
           category: this.mapCategory(exercise.muscle_group),
-          instructions: exercise.primary_function || "No instructions available",
+          instructions: exercise.primary_function || exercise.instructions || "No instructions available",
           difficulty: this.mapDifficulty(exercise.difficulty_level),
           equipment: exercise.equipment || [],
           muscleGroups: exercise.muscle_group || []
@@ -223,75 +166,103 @@ export class MongoStorage implements IStorage {
     }
   }
 
-  async getAllWorkouts(): Promise<any[]> {
+  async getWorkouts(): Promise<any[]> {
+    await this.connect();
     return await this.workouts.find({}).toArray();
   }
 
+  async getAllWorkouts(): Promise<any[]> {
+    return await this.getWorkouts();
+  }
+
+  async createWorkout(workout: any): Promise<any> {
+    await this.connect();
+    const result = await this.workouts.insertOne(workout);
+    return { ...workout, _id: result.insertedId };
+  }
+
   async getRecentWorkouts(): Promise<any[]> {
+    await this.connect();
     return await this.workouts.find({}).sort({ date: -1 }).limit(5).toArray();
   }
 
+  async getMealsByDate(date: Date): Promise<any[]> {
+    await this.connect();
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return await this.meals.find({
+      date: {
+        $gte: startOfDay,
+        $lte: endOfDay
+      }
+    }).toArray();
+  }
+
   async getAllMeals(): Promise<any[]> {
+    await this.connect();
     return await this.meals.find({}).toArray();
   }
 
+  async createMeal(meal: any): Promise<any> {
+    await this.connect();
+    const result = await this.meals.insertOne(meal);
+    return { ...meal, _id: result.insertedId };
+  }
+
+  async getNutritionGoals(): Promise<any[]> {
+    await this.connect();
+    return await this.nutritionGoals.find({}).toArray();
+  }
+
+  async getAllNutritionGoals(): Promise<any[]> {
+    return await this.getNutritionGoals();
+  }
+
+  async createNutritionGoal(goal: any): Promise<any> {
+    await this.connect();
+    const result = await this.nutritionGoals.insertOne(goal);
+    return { ...goal, _id: result.insertedId };
+  }
+
   async createRecipe(recipe: any): Promise<any> {
+    await this.connect();
     const result = await this.recipes.insertOne(recipe);
     return { ...recipe, _id: result.insertedId };
   }
 
   async getAllRecipes(): Promise<any[]> {
+    await this.connect();
     return await this.recipes.find({}).toArray();
   }
 
-  async getAllNutritionGoals(): Promise<any[]> {
-    return await this.nutritionGoals.find({}).toArray();
-  }
-
   async createChallenge(challenge: any): Promise<any> {
+    await this.connect();
     const result = await this.challenges.insertOne(challenge);
     return { ...challenge, _id: result.insertedId };
   }
 
   async getAllChallenges(): Promise<any[]> {
+    await this.connect();
     return await this.challenges.find({}).toArray();
   }
 
   async createWeightEntry(weightEntry: any): Promise<any> {
+    await this.connect();
     const result = await this.weightEntries.insertOne(weightEntry);
     return { ...weightEntry, _id: result.insertedId };
   }
 
   async getWeightEntries(): Promise<any[]> {
+    await this.connect();
     return await this.weightEntries.find({}).sort({ date: -1 }).toArray();
   }
 
   async getLatestWeight(): Promise<any> {
+    await this.connect();
     return await this.weightEntries.findOne({}, { sort: { date: -1 } });
-  }
-
-  // Missing methods required by storage interface
-  async getAllMeals(): Promise<any[]> {
-    return await this.meals.find({}).toArray();
-  }
-
-  async getAllRecipes(): Promise<any[]> {
-    return await this.recipes.find({}).toArray();
-  }
-
-  async getAllNutritionGoals(): Promise<any[]> {
-    return await this.nutritionGoals.find({}).toArray();
-  }
-
-  async getAllWorkouts(): Promise<any[]> {
-    return await this.workouts.find({}).toArray();
-  }
-
-  async getRecentWorkouts(): Promise<any[]> {
-    return await this.workouts.find({}).sort({ date: -1 }).limit(5).toArray();
-  }
-
-  async getAllChallenges(): Promise<any[]> {
-    return await this.challenges.find({}).toArray();
   }
 }
