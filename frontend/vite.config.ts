@@ -10,6 +10,11 @@ export default defineConfig({
       "@shared": path.resolve(__dirname, "../shared"),
     },
   },
+  build: {
+    rollupOptions: {
+      external: ["drizzle-orm/pg-core", "drizzle-orm"]
+    }
+  },
   server: {
     port: 5173,
     host: "0.0.0.0",
