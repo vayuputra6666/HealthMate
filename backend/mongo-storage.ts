@@ -1,5 +1,5 @@
 
-import { MongoClient, Db, Collection } from 'mongodb';
+import { MongoClient, Db, Collection, ServerApiVersion } from 'mongodb';
 import { IStorage } from "./storage.js";
 
 export class MongoStorage implements IStorage {
@@ -9,17 +9,29 @@ export class MongoStorage implements IStorage {
   private workouts: Collection;
   private meals: Collection;
   private nutritionGoals: Collection;
+  private recipes: Collection;
+  private weightEntries: Collection;
+  private challenges: Collection;
 
   constructor() {
-    const mongoUrl = process.env.MONGODB_URL || 'mongodb://0.0.0.0:27017';
+    const mongoUrl = process.env.MONGODB_URL || "mongodb+srv://vayuputra:Vayu123@cluster0.wxwtcpc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
     const dbName = process.env.MONGODB_DB_NAME || 'health_mate';
 
-    this.client = new MongoClient(mongoUrl);
+    this.client = new MongoClient(mongoUrl, {
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+      }
+    });
     this.db = this.client.db(dbName);
     this.exercises = this.db.collection("exercises");
     this.workouts = this.db.collection("workouts");
     this.meals = this.db.collection("meals");
     this.nutritionGoals = this.db.collection("nutrition_goals");
+    this.recipes = this.db.collection("recipes");
+    this.weightEntries = this.db.collection("weight_entries");
+    this.challenges = this.db.collection("challenges");
   }
 
   async connect(): Promise<void> {
@@ -78,5 +90,61 @@ export class MongoStorage implements IStorage {
   async createNutritionGoal(goal: any): Promise<any> {
     const result = await this.nutritionGoals.insertOne(goal);
     return { ...goal, _id: result.insertedId };
+  }
+
+  // Additional methods required by routes
+  async getAllExercises(): Promise<any[]> {
+    return await this.exercises.find({}).toArray();
+  }
+
+  async getExerciseById(id: number): Promise<any> {
+    return await this.exercises.findOne({ id: id });
+  }
+
+  async getAllWorkouts(): Promise<any[]> {
+    return await this.workouts.find({}).toArray();
+  }
+
+  async getRecentWorkouts(): Promise<any[]> {
+    return await this.workouts.find({}).sort({ date: -1 }).limit(5).toArray();
+  }
+
+  async getAllMeals(): Promise<any[]> {
+    return await this.meals.find({}).toArray();
+  }
+
+  async createRecipe(recipe: any): Promise<any> {
+    const result = await this.recipes.insertOne(recipe);
+    return { ...recipe, _id: result.insertedId };
+  }
+
+  async getAllRecipes(): Promise<any[]> {
+    return await this.recipes.find({}).toArray();
+  }
+
+  async getAllNutritionGoals(): Promise<any[]> {
+    return await this.nutritionGoals.find({}).toArray();
+  }
+
+  async createChallenge(challenge: any): Promise<any> {
+    const result = await this.challenges.insertOne(challenge);
+    return { ...challenge, _id: result.insertedId };
+  }
+
+  async getAllChallenges(): Promise<any[]> {
+    return await this.challenges.find({}).toArray();
+  }
+
+  async createWeightEntry(weightEntry: any): Promise<any> {
+    const result = await this.weightEntries.insertOne(weightEntry);
+    return { ...weightEntry, _id: result.insertedId };
+  }
+
+  async getWeightEntries(): Promise<any[]> {
+    return await this.weightEntries.find({}).sort({ date: -1 }).toArray();
+  }
+
+  async getLatestWeight(): Promise<any> {
+    return await this.weightEntries.findOne({}, { sort: { date: -1 } });
   }
 }
