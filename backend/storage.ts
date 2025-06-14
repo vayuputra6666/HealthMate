@@ -1,6 +1,7 @@
 import { MongoStorage } from "./mongo-storage.js";
 
 export interface IStorage {
+  connect(): Promise<void>;
   getExercises(): Promise<any[]>;
   createExercise(exercise: any): Promise<any>;
   getWorkouts(): Promise<any[]>;
@@ -47,6 +48,44 @@ class InMemoryStorage implements IStorage {
   private recipes: any[] = [];
   private weightEntries: any[] = [];
   private challenges: any[] = [];
+
+  async connect(): Promise<void> {
+    console.log("Storage: In-memory storage connected");
+    
+    // Initialize with sample exercises if empty
+    if (this.exercises.length === 0) {
+      this.exercises = [
+        {
+          id: "1",
+          name: "Push-ups",
+          category: "chest",
+          instructions: "Lower your body until your chest nearly touches the floor, then push back up.",
+          difficulty: "beginner",
+          muscleGroups: ["chest", "shoulders", "triceps"],
+          equipment: ["bodyweight"]
+        },
+        {
+          id: "2", 
+          name: "Squats",
+          category: "legs",
+          instructions: "Lower your body by bending your knees until your thighs are parallel to the floor.",
+          difficulty: "beginner",
+          muscleGroups: ["quadriceps", "glutes", "hamstrings"],
+          equipment: ["bodyweight"]
+        },
+        {
+          id: "3",
+          name: "Pull-ups", 
+          category: "back",
+          instructions: "Hang from a bar and pull your body up until your chin is above the bar.",
+          difficulty: "intermediate",
+          muscleGroups: ["back", "biceps"],
+          equipment: ["pull-up bar"]
+        }
+      ];
+      console.log("Storage: Initialized with sample exercises");
+    }
+  }
 
   async getExercises(): Promise<any[]> {
     return this.exercises;
