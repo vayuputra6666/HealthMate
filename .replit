@@ -35,7 +35,7 @@ localPort = 5176
 externalPort = 3003
 
 [workflows]
-runButton = "Dev Both"
+runButton = "Dev Both Restart"
 
 [[workflows.workflow]]
 name = "Project"
@@ -90,6 +90,19 @@ args = "cd backend && npm run dev"
 name = "Frontend Only"
 author = 43817913
 mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && npm run dev"
+
+[[workflows.workflow]]
+name = "Dev Both Restart"
+author = 43843803
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && npm install && npm run dev"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"

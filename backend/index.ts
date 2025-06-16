@@ -8,10 +8,15 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? true // Allow any origin in production for Replit
-    : true, // Allow any origin in development
-  credentials: true
+  origin: [
+    'http://localhost:5173',
+    'http://0.0.0.0:5173',
+    'https://51d76f11-192a-4da6-af5b-92acab03c729-00-38kybzaz22f7l.spock.replit.dev',
+    /.*\.replit\.dev$/
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json({ limit: '10mb' }));
