@@ -1,0 +1,117 @@
+The 404 Not Found error occurs when your frontend is trying to fetch data from an API endpoint that doesn't exist or is misconfigured. Since you're using MongoDB, let's troubleshoot step by step.
+
+Step 1: Check the API Endpoint in Frontend
+The error is coming from src/lib/api.ts and src/pages/exercises.tsx. Open these files and verify:
+
+Is the API URL correct?
+
+If you're testing locally, it should be something like:
+
+ts
+const API_URL = "http://localhost:3000/api/exercises"; // Adjust port if needed
+If deployed, ensure it matches your backend URL:
+
+ts
+const API_URL = "https://your-backend.vercel.app/api/exercises";
+Is the request method correct?
+
+Example (in api.ts):
+
+ts
+const response = await fetch(`${API_URL}`, {
+  method: "GET", // or "POST" if needed
+  headers: { "Content-Type": "application/json" },
+});
+Step 2: Verify Backend API Route
+Your backend (likely Express.js or similar) should:
+
+Have a /api/exercises route
+Example (Express.js):
+
+ts
+import express from "express";
+import Exercise from "./models/Exercise"; // Your MongoDB model
+
+const router = express.Router();
+
+// GET /api/exercises
+router.get("/exercises", async (req, res) => {
+  try {
+    const exercises = await Exercise.find({}); // Fetch from MongoDB
+    res.status(200).json(exercises);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch exercises" });
+  }
+});
+
+export default router;
+Is the backend running?
+
+If testing locally, run:
+
+bash
+npm run dev # or `node server.js`
+Check if http://localhost:3000/api/exercises works in Postman or browser.
+
+Step 3: Check MongoDB Connection
+Ensure your backend is connected to MongoDB:
+
+Is MONGODB_URI set correctly?
+
+In .env (backend):
+
+env
+MONGODB_URI=mongodb+srv://username:password@cluster0.mongodb.net/yourdb?retryWrites=true&w=majority
+Verify connection in your backend:
+
+ts
+import mongoose from "mongoose";
+
+mongoose.connect(process.env.MONGODB_URI!)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch(err => console.error("MongoDB connection error:", err));
+Does the Exercise model exist?
+Example model (models/Exercise.ts):
+
+ts
+import { Schema, model } from "mongoose";
+
+const ExerciseSchema = new Schema({
+  name: { type: String, required: true },
+  difficulty: { type: String, enum: ["Easy", "Medium", "Hard"] },
+});
+
+export default model("Exercise", ExerciseSchema);
+Step 4: Fix CORS (If Frontend & Backend Are Separate)
+If your frontend (localhost:5173) and backend (localhost:3000) run on different ports, enable CORS:
+
+ts
+import cors from "cors";
+const app = express();
+
+app.use(cors()); // Allow all origins (or restrict to your frontend URL)
+Step 5: Debug Network Requests
+Open Browser DevTools (F12) → Network Tab
+
+Check the exact URL being requested.
+
+Look for 404 errors in the response.
+
+Test the API manually
+
+Open http://localhost:3000/api/exercises in your browser or Postman.
+
+If it returns 404, your backend route is missing.
+
+Common Fixes Summary
+Issue	Solution
+Wrong API URL	Update API_URL in frontend
+Missing Backend Route	Implement GET /api/exercises
+MongoDB Not Connected	Check MONGODB_URI and connection code
+CORS Blocking Requests	Add app.use(cors()) in backend
+Exercise Model Missing	Define Exercise schema in MongoDB
+Final Checks
+✅ Backend running? (http://localhost:3000/api/exercises works?)
+✅ Frontend API_URL matches backend?
+✅ MongoDB connected? (Check logs)
+✅ CORS enabled?

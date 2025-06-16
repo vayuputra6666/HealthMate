@@ -1,0 +1,31 @@
+[vite] connecting...
+[vite] connected.
+Fetching exercises from API...
+Exercise fetch error: 
+ApiError {status: 404, name: "ApiError"}
+name: "ApiError"
+status: 404
+message: "HTTP 404: Not Found"
+stack: "ApiError: HTTP 404: Not Found↵ at apiRequest (https://51d76f11-192a-4da6-af5b-92acab03c729-00-38kybzaz22f7l.spock.replit.dev/src/lib/api.ts:20:13)↵ at async queryFn (https://51d76f11-192a-4da6-af5b-92acab03c729-00-38kybzaz22f7l.spock.replit.dev/src/pages/exercises.tsx:40:22)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+at t.value (https://51d76f11-192a-4da6-af5b-92acab03c729-00-38kybzaz22f7l.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://51d76f11-192a-4da6-af5b-92acab03c729-00-38kybzaz22f7l.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://51d76f11-192a-4da6-af5b-92acab03c729-00-38kybzaz22f7l.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://51d76f11-192a-4da6-af5b-92acab03c729-00-38kybzaz22f7l.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Exercise loading error: 
+ApiError {status: 404, name: "ApiError"}
+name: "ApiError"
+status: 404
+message: "HTTP 404: Not Found"
+stack: "ApiError: HTTP 404: Not Found↵ at apiRequest (https://51d76f11-192a-4da6-af5b-92acab03c729-00-38kybzaz22f7l.spock.replit.dev/src/lib/api.ts:20:13)↵ at async queryFn (https://51d76f11-192a-4da6-af5b-92acab03c729-00-38kybzaz22f7l.spock.replit.dev/src/pages/exercises.tsx:40:22)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+at t.value (https://51d76f11-192a-4da6-af5b-92acab03c729-00-38kybzaz22f7l.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://51d76f11-192a-4da6-af5b-92acab03c729-00-38kybzaz22f7l.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://51d76f11-192a-4da6-af5b-92acab03c729-00-38kybzaz22f7l.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://51d76f11-192a-4da6-af5b-92acab03c729-00-38kybzaz22f7l.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
