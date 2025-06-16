@@ -13,8 +13,14 @@ import {
 } from "../shared/schema.js";
 
 export async function registerRoutes(app: Express) {
-  const storage = await getStorage();
-  await storage.connect();
+  console.log("Routes: Starting route registration...");
+  
+  try {
+    const storage = await getStorage();
+    console.log("Routes: Storage instance created");
+    
+    await storage.connect();
+    console.log("Routes: Storage connected successfully");
 
   // Test endpoint
   app.get("/api/test", async (req, res) => {
@@ -254,4 +260,11 @@ export async function registerRoutes(app: Express) {
       res.status(500).json({ message: "Failed to fetch latest weight" });
     }
   });
+
+  console.log("Routes: All routes registered successfully");
+  
+  } catch (error) {
+    console.error("Routes: Failed to register routes:", error);
+    throw error;
+  }
 }
