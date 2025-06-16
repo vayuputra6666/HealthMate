@@ -51,7 +51,7 @@ class InMemoryStorage implements IStorage {
 
   async connect(): Promise<void> {
     console.log("Storage: In-memory storage connected");
-    
+
     // Initialize with sample exercises if empty
     if (this.exercises.length === 0) {
       this.exercises = [
@@ -402,9 +402,13 @@ class MongoStorage implements IStorage {
   }
 }
 
+let storage: IStorage | null = null;
+
 export async function getStorage(): Promise<IStorage> {
   if (!storage) {
-    storage = await initializeStorage();
+    // Use MongoDB storage
+    storage = new MongoStorage();
+    await storage.connect();
   }
   return storage;
 }

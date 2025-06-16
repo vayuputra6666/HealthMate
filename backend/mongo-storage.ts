@@ -63,7 +63,7 @@ export class MongoStorage implements IStorage {
 
     // Map common muscle groups to categories based on your MongoDB data
     if (primaryMuscle.includes('chest') || primaryMuscle.includes('pectoral')) return 'chest';
-    if (primaryMuscle.includes('back') || primaryMuscle.includes('lats') || primaryMuscle.includes('rhomboids') || primaryMuscle.includes('trap')) return 'back';
+    if (primaryMuscle.includes('back') || primaryMuscle.includes('lats') || primaryMuscle.includes('rhomboids') || primaryMuscle.includes('trap') || primaryMuscle.includes('lower back')) return 'back';
     if (primaryMuscle.includes('shoulder') || primaryMuscle.includes('deltoid')) return 'shoulders';
     if (primaryMuscle.includes('bicep') || primaryMuscle.includes('tricep') || primaryMuscle.includes('forearm')) return 'arms';
     if (primaryMuscle.includes('quad') || primaryMuscle.includes('hamstring') || primaryMuscle.includes('glute') || primaryMuscle.includes('calf')) return 'legs';
@@ -80,6 +80,7 @@ export class MongoStorage implements IStorage {
 
     if (difficulty.includes('advanced') || difficulty.includes('expert') || difficulty.includes('hard')) return 'advanced';
     if (difficulty.includes('intermediate') || difficulty.includes('medium')) return 'intermediate';
+    if (difficulty.includes('beginner') || difficulty.includes('easy') || difficulty.includes('basic')) return 'beginner';
 
     return 'beginner';
   }

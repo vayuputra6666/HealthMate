@@ -6,20 +6,26 @@ export interface IExercise extends Document {
   exercise_name: string;
   name?: string;
   muscle_group: string | string[];
+  movement_type?: string;
   primary_function?: string;
   instructions?: string;
   difficulty_level?: string;
   equipment?: string | string[];
+  variations?: string[];
+  created_at?: Date;
 }
 
 const exerciseSchema = new Schema<IExercise>({
   exercise_name: { type: String, required: true },
   name: { type: String },
   muscle_group: { type: Schema.Types.Mixed },
+  movement_type: { type: String },
   primary_function: { type: String },
   instructions: { type: String },
   difficulty_level: { type: String },
-  equipment: { type: Schema.Types.Mixed }
+  equipment: { type: Schema.Types.Mixed },
+  variations: [{ type: String }],
+  created_at: { type: Date }
 }, { collection: 'exercises' });
 
 export const Exercise = mongoose.model<IExercise>('Exercise', exerciseSchema);
