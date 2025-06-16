@@ -186,69 +186,6 @@ class InMemoryStorage implements IStorage {
     if (this.weightEntries.length === 0) return null;
     return this.weightEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   }
-
-  // Additional methods required by routes
-  async getAllExercises(): Promise<any[]> {
-    return this.exercises;
-  }
-
-  async getExerciseById(id: number): Promise<any> {
-    return this.exercises.find(exercise => exercise.id === id.toString()) || null;
-  }
-
-  async getAllWorkouts(): Promise<any[]> {
-    return this.workouts;
-  }
-
-  async getRecentWorkouts(): Promise<any[]> {
-    return this.workouts.slice(-5);
-  }
-
-  async getAllMeals(): Promise<any[]> {
-    return this.meals;
-  }
-
-  async createRecipe(recipe: any): Promise<any> {
-    const newRecipe = { ...recipe, id: Date.now().toString() };
-    this.recipes = this.recipes || [];
-    this.recipes.push(newRecipe);
-    return newRecipe;
-  }
-
-  async getAllRecipes(): Promise<any[]> {
-    return this.recipes || [];
-  }
-
-  async getAllNutritionGoals(): Promise<any[]> {
-    return this.nutritionGoals;
-  }
-
-  async createChallenge(challenge: any): Promise<any> {
-    const newChallenge = { ...challenge, id: Date.now().toString() };
-    this.challenges = this.challenges || [];
-    this.challenges.push(newChallenge);
-    return newChallenge;
-  }
-
-  async getAllChallenges(): Promise<any[]> {
-    return this.challenges || [];
-  }
-
-  async createWeightEntry(weightEntry: any): Promise<any> {
-    const newEntry = { ...weightEntry, id: Date.now().toString() };
-    this.weightEntries = this.weightEntries || [];
-    this.weightEntries.push(newEntry);
-    return newEntry;
-  }
-
-  async getWeightEntries(): Promise<any[]> {
-    return this.weightEntries || [];
-  }
-
-  async getLatestWeight(): Promise<any> {
-    const entries = this.weightEntries || [];
-    return entries.length > 0 ? entries[entries.length - 1] : null;
-  }
 }
 
 class MongoStorage implements IStorage {
@@ -402,12 +339,14 @@ class MongoStorage implements IStorage {
   }
 }
 
-let storage: IStorage | null = null;
-
 export async function getStorage(): Promise<IStorage> {
   if (!storage) {
     // Use MongoDB storage
-    storage = new MongoStorage();
+    if (process.env.USE_MONGODB === 'true') {
+      storage = new MongoStorage();
+    } else {
+      storage = new InMemoryStorage();
+    }
     await storage.connect();
   }
   return storage;
