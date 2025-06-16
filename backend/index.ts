@@ -1,4 +1,3 @@
-
 import express from 'express';
 import cors from 'cors';
 import { registerRoutes } from './routes.js';
@@ -50,25 +49,29 @@ app.get('/debug/routes', (req, res) => {
   res.json({ routes, total: routes.length });
 });
 
-// Register API routes
-console.log('Registering API routes...');
-registerRoutes(app);
-console.log('API routes registered successfully');
+// Async startup function
+async function startServer() {
+  console.log('Registering API routes...');
+  await registerRoutes(app);
+  console.log('API routes registered successfully');
 
-// Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error:', err);
-  res.status(500).json({ 
-    message: 'Internal server error',
-    error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+  // Error handling middleware
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('Error:', err);
+    res.status(500).json({ 
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+    });
   });
-});
 
-// 404 handler for API routes
-app.use('/api/*', (req, res) => {
-  res.status(404).json({ message: 'API endpoint not found' });
-});
+  // 404 handler for API routes
+  app.use('/api/*', (req, res) => {
+    res.status(404).json({ message: 'API endpoint not found' });
+  });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Backend server running on http://0.0.0.0:${PORT}`);
-});
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Backend server running on http://0.0.0.0:${PORT}`);
+  });
+}
+
+startServer();
