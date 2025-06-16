@@ -1,0 +1,90 @@
+
+> health-mate-frontend@1.0.0 dev
+> vite
+
+
+  VITE v5.4.19  ready in 249 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://172.31.128.71:5173/
+  ➜  press h + enter to show help
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Sending Request to the Target: GET /api/exercises
+proxy error Error: connect ECONNREFUSED 0.0.0.0:3000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '0.0.0.0',
+  port: 3000
+}
+4:39:01 PM [vite] http proxy error: /api/exercises
+Error: connect ECONNREFUSED 0.0.0.0:3000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)
+Sending Request to the Target: GET /api/exercises
+proxy error Error: connect ECONNREFUSED 0.0.0.0:3000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '0.0.0.0',
+  port: 3000
+}
+4:39:53 PM [vite] http proxy error: /api/exercises
+Error: connect ECONNREFUSED 0.0.0.0:3000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) (x2)
+Sending Request to the Target: GET /api/exercises
+proxy error Error: connect ECONNREFUSED 0.0.0.0:3000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '0.0.0.0',
+  port: 3000
+}
+4:39:55 PM [vite] http proxy error: /api/exercises
+Error: connect ECONNREFUSED 0.0.0.0:3000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) (x3)
+Sending Request to the Target: GET /api/exercises
+proxy error Error: connect ECONNREFUSED 0.0.0.0:3000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '0.0.0.0',
+  port: 3000
+}
+4:39:57 PM [vite] http proxy error: /api/exercises
+Error: connect ECONNREFUSED 0.0.0.0:3000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) (x4)
+Sending Request to the Target: GET /api/exercises
+proxy error Error: connect ECONNREFUSED 0.0.0.0:3000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '0.0.0.0',
+  port: 3000
+}
+4:40:01 PM [vite] http proxy error: /api/exercises
+Error: connect ECONNREFUSED 0.0.0.0:3000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) (x5)
+ 
