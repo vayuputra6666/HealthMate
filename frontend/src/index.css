@@ -1,0 +1,190 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes dumbbell-bounce {
+  0% {
+    transform: translateY(-80px) rotate(0deg);
+    animation-timing-function: ease-in;
+  }
+  
+  15% {
+    transform: translateY(0px) rotate(45deg);
+    animation-timing-function: ease-out;
+  }
+  
+  20% {
+    transform: translateY(-25px) rotate(90deg);
+    animation-timing-function: ease-in;
+  }
+  
+  30% {
+    transform: translateY(0px) rotate(135deg);
+    animation-timing-function: ease-out;
+  }
+  
+  35% {
+    transform: translateY(-15px) rotate(180deg);
+    animation-timing-function: ease-in;
+  }
+  
+  42% {
+    transform: translateY(0px) rotate(225deg);
+    animation-timing-function: ease-out;
+  }
+  
+  46% {
+    transform: translateY(-8px) rotate(270deg);
+    animation-timing-function: ease-in;
+  }
+  
+  52% {
+    transform: translateY(0px) rotate(315deg);
+    animation-timing-function: ease-out;
+  }
+  
+  55% {
+    transform: translateY(-4px) rotate(360deg);
+    animation-timing-function: ease-in;
+  }
+  
+  60% {
+    transform: translateY(0px) rotate(360deg);
+    animation-timing-function: ease-out;
+  }
+  
+  62% {
+    transform: translateY(-2px) rotate(360deg);
+    animation-timing-function: ease-in;
+  }
+  
+  66% {
+    transform: translateY(0px) rotate(360deg);
+    animation-timing-function: ease-out;
+  }
+  
+  68% {
+    transform: translateY(-1px) rotate(360deg);
+    animation-timing-function: ease-in;
+  }
+  
+  72% {
+    transform: translateY(0px) rotate(360deg);
+  }
+  
+  72% {
+    transform: translateY(0px) rotate(360deg);
+  }
+  
+  100% {
+    transform: translateY(0px) rotate(360deg);
+  }
+}
+
+.animate-dumbbell-bounce {
+  animation: dumbbell-bounce 3s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+@keyframes bounce-flip {
+  0%, 100% {
+    transform: translateY(0) rotateX(0deg);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  25% {
+    transform: translateY(-25%) rotateX(90deg);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+  50% {
+    transform: translateY(-50%) rotateX(180deg);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  75% {
+    transform: translateY(-25%) rotateX(270deg);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.animate-bounce-flip {
+  animation: bounce-flip 2s infinite;
+}
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(240, 10%, 3.9%);
+  --muted: hsl(240, 4.8%, 95.9%);
+  --muted-foreground: hsl(240, 3.7%, 45.1%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(240, 10%, 3.9%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(240, 10%, 3.9%);
+  --border: hsl(240, 5.9%, 90%);
+  --input: hsl(240, 5.9%, 90%);
+  --primary: hsl(221, 39%, 11%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(240, 4.8%, 95.9%);
+  --secondary-foreground: hsl(240, 5.9%, 10%);
+  --accent: hsl(240, 4.8%, 95.9%);
+  --accent-foreground: hsl(240, 5.9%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 10%, 3.9%);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(0, 0%, 98%);
+  --primary-foreground: hsl(240, 5.9%, 10%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Custom styles for minimalist design */
+.stat-card {
+  @apply bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow;
+}
+
+.sidebar-link {
+  @apply flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors;
+}
+
+.sidebar-link.active {
+  @apply text-gray-900 bg-gray-100;
+}
+
+.sidebar-link:not(.active) {
+  @apply text-gray-500 hover:text-gray-900 hover:bg-gray-100;
+}
+
+.workout-card {
+  @apply bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer;
+}
+
+.exercise-card {
+  @apply border border-gray-200 rounded-lg transition-colors;
+}

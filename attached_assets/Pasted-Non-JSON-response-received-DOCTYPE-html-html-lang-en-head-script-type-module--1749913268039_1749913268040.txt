@@ -1,0 +1,71 @@
+Non-JSON response received: <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script type="module">
+import RefreshRuntime from "/@react-refresh"
+RefreshRuntime.injectIntoGlobalHook(window)
+window.$RefreshReg$ = () => {}
+window.$RefreshSig$ = () => (type) => type
+window.__vite_plugin_react_preamble_installed__ = true
+</script>
+
+    <script type="module" src="/@vite/client"></script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Health Mate</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+  </body>
+</html>
+Exercise fetch error: 
+ApiError {status: 200, name: "ApiError"}
+
+Fetching exercises from API...
+Non-JSON response received: <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script type="module">
+import RefreshRuntime from "/@react-refresh"
+RefreshRuntime.injectIntoGlobalHook(window)
+window.$RefreshReg$ = () => {}
+window.$RefreshSig$ = () => (type) => type
+window.__vite_plugin_react_preamble_installed__ = true
+</script>
+
+    <script type="module" src="/@vite/client"></script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Health Mate</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+  </body>
+</html>
+Exercise fetch error: 
+ApiError {status: 200, name: "ApiError"}
+name: "ApiError"
+status: 200
+message: "Server returned non-JSON response"
+stack: "ApiError: Server returned non-JSON response↵ at apiRequest (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/src/lib/api.ts:26:13)↵ at async queryFn (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/src/pages/exercises.tsx:40:22)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+Exercise loading error: 
+ApiError {status: 200, name: "ApiError"}
+name: "ApiError"
+status: 200
+message: "Server returned non-JSON response"
+stack: "ApiError: Server returned non-JSON response↵ at apiRequest (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/src/lib/api.ts:26:13)↵ at async queryFn (https://5aae5467-73c4-4f8d-a82b-84fe38a15d08-00-2bdrx8yvtrolc.janeway.replit.dev/src/pages/exercises.tsx:40:22)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object

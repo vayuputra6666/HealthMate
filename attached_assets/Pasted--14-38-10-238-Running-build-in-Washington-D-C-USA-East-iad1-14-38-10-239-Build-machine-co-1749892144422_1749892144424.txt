@@ -1,0 +1,61 @@
+[14:38:10.238] Running build in Washington, D.C., USA (East) – iad1
+[14:38:10.239] Build machine configuration: 2 cores, 8 GB
+[14:38:10.251] Cloning github.com/vayuputra6666/HealthMate (Branch: mern, Commit: f0a1f75)
+[14:38:10.258] Skipping build cache, deployment was triggered without cache.
+[14:38:10.488] Cloning completed: 237.000ms
+[14:38:10.798] Running "vercel build"
+[14:38:11.252] Vercel CLI 42.2.0
+[14:38:11.752] Running "install" command: `npm install; npm install @tailwindcss/typography`...
+[14:38:18.773] 
+[14:38:18.774] added 312 packages, and audited 313 packages in 7s
+[14:38:18.774] 
+[14:38:18.774] 45 packages are looking for funding
+[14:38:18.774]   run `npm fund` for details
+[14:38:18.784] 
+[14:38:18.784] 2 moderate severity vulnerabilities
+[14:38:18.784] 
+[14:38:18.785] To address all issues (including breaking changes), run:
+[14:38:18.785]   npm audit fix --force
+[14:38:18.785] 
+[14:38:18.785] Run `npm audit` for details.
+[14:38:18.787] npm notice
+[14:38:18.787] npm notice New major version of npm available! 10.9.2 -> 11.4.2
+[14:38:18.788] npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.4.2
+[14:38:18.789] npm notice To update run: npm install -g npm@11.4.2
+[14:38:18.789] npm notice
+[14:38:20.112] 
+[14:38:20.113] added 5 packages, and audited 318 packages in 1s
+[14:38:20.113] 
+[14:38:20.113] 45 packages are looking for funding
+[14:38:20.114]   run `npm fund` for details
+[14:38:20.129] 
+[14:38:20.129] 2 moderate severity vulnerabilities
+[14:38:20.129] 
+[14:38:20.129] To address all issues (including breaking changes), run:
+[14:38:20.129]   npm audit fix --force
+[14:38:20.130] 
+[14:38:20.130] Run `npm audit` for details.
+[14:38:20.388] 
+[14:38:20.389] > health-mate-frontend@1.0.0 build
+[14:38:20.389] > vite build
+[14:38:20.389] 
+[14:38:20.636] [36mvite v5.4.19 [32mbuilding for production...[36m[39m
+[14:38:20.683] transforming...
+[14:38:24.570] [32m✓[39m 1751 modules transformed.
+[14:38:24.576] [31mx[39m Build failed in 3.92s
+[14:38:24.577] [31merror during build:
+[14:38:24.577] [31m[vite]: Rollup failed to resolve import "drizzle-orm/pg-core" from "/vercel/path0/shared/schema.ts".
+[14:38:24.577] This is most likely unintended because it can break your application at runtime.
+[14:38:24.578] If you do want to externalize this module explicitly add it to
+[14:38:24.578] `build.rollupOptions.external`[31m
+[14:38:24.578]     at viteWarn (file:///vercel/path0/frontend/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:65839:17)
+[14:38:24.578]     at onwarn (file:///vercel/path0/frontend/node_modules/@vitejs/plugin-react/dist/index.mjs:104:9)
+[14:38:24.578]     at onRollupWarning (file:///vercel/path0/frontend/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:65869:5)
+[14:38:24.578]     at onwarn (file:///vercel/path0/frontend/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:65534:7)
+[14:38:24.578]     at file:///vercel/path0/frontend/node_modules/rollup/dist/es/shared/node-entry.js:20798:13
+[14:38:24.579]     at Object.logger [as onLog] (file:///vercel/path0/frontend/node_modules/rollup/dist/es/shared/node-entry.js:22664:9)
+[14:38:24.579]     at ModuleLoader.handleInvalidResolvedId (file:///vercel/path0/frontend/node_modules/rollup/dist/es/shared/node-entry.js:21410:26)
+[14:38:24.579]     at file:///vercel/path0/frontend/node_modules/rollup/dist/es/shared/node-entry.js:21368:26[39m
+[14:38:24.603] Error: Command "npm run build" exited with 1
+[14:38:24.904] 
+[14:38:27.821] Exiting build container
